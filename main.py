@@ -26,6 +26,9 @@ class ModularHomeBuilder(tk.Tk):
         self.frames = []
         self.selected_frame_index = None
         self.temp_tochki = []
+        self.temp_sides = []
+        self.free_sides = []
+
         self.short_soed = 0
         self.long_soed = 0
 
@@ -45,9 +48,70 @@ class ModularHomeBuilder(tk.Tk):
         for count in counter.values():
             repetitions_count[count] += 1
 
-        s = f'Узлы: {repetitions_count}\nКороткие соединения: {self.short_soed}\nДлинные соединения: {self.long_soed}\nКол-во блоков: {int(len(self.temp_tochki)/4)}'
-
+        s = f'Узлы: {repetitions_count}\nКороткие соединения: {self.short_soed}\nДлинные соединения: {self.long_soed}\nКол-во блоков: {int(len(self.temp_tochki)/4)}\n'
+        s += self.calculate_external_sides()
         self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
+
+
+    def calculate_free_sides(self):
+        self.free_sides = []
+        for el in self.temp_sides:
+            if self.temp_sides.count(el) == 1:
+                self.free_sides.append(el)
+
+
+    def calculate_external_sides(self):
+        d_x = dict()
+        d_y = dict()
+        for i in range(len(self.free_sides)):
+            if self.free_sides[i][0][0] == self.free_sides[i][1][0] and (self.free_sides[i][0][0] not in d_x.keys()):
+                d_x[self.free_sides[i][0][0]] = [self.free_sides[i]]
+                for j in range(i + 1, len(self.free_sides)):
+                    if self.free_sides[j][0][0] == self.free_sides[j][1][0] == self.free_sides[i][0][0]:
+                        d_x[self.free_sides[i][0][0]].append(self.free_sides[j])
+
+        for i in range(len(self.free_sides)):
+            if self.free_sides[i][0][1] == self.free_sides[i][1][1] and (self.free_sides[i][0][1] not in d_y.keys()):
+                d_y[self.free_sides[i][0][1]] = [self.free_sides[i]]
+                for j in range(i + 1, len(self.free_sides)):
+                    if self.free_sides[j][0][1] == self.free_sides[j][1][1] == self.free_sides[i][0][1]:
+                        # TODO: добавить проверку на огромный разрыв и соответствие
+                        d_y[self.free_sides[i][0][1]].append(self.free_sides[j])
+
+
+
+        print(d_x)
+        print(d_y)
+
+        arr_short = [None,0,0,0,0,0,0,0]
+
+        for el in d_x.values():
+            print(el)
+            count = len(el)
+            arr_short[count] += 1
+
+        arr_long = [None, 0, 0, 0, 0, 0, 0, 0]
+
+        for el in d_y.values():
+            count = len(el)
+            arr_long[count] += 1
+            print(arr_long)
+
+
+        s = f''
+        for i in range(1, len(arr_short)):
+            if arr_short[i] > 0:
+                s += f'{i} внешних коротких - {arr_short[i]} штук\n'
+
+        for i in range(1, len(arr_long)):
+            if arr_long[i] > 0:
+                s += f'{i} внешних длинных - {arr_long[i]} штук\n'
+                print(s)
+
+        return s
+
+
+
 
 
     def init_frame(self):
@@ -163,15 +227,18 @@ class ModularHomeBuilder(tk.Tk):
 
     def on_enter_side(self, event, frame):
         # Вывод чего-то на экран при наведении на сторону прямоугольника
-        self.result_label.config(text=f"Наведено на \n ({frame.x}, {frame.y})")
+        print(f"Наведено на \n ({frame.x}, {frame.y})")
+        #self.result_label.config(text=f"Наведено на \n ({frame.x}, {frame.y})")
 
     def on_leave_side(self):
         # Очистка метки при уходе курсора с прямоугольника
-        self.result_label.config(text="")
+        #self.result_label.config(text="")
+        pass
 
     def on_click_side(self, event, frame):
         # Вывод информации при нажатии на сторону прямоугольника
-        self.result_label.config(text=f"Нажатие на \n({frame.x}, {frame.y})")
+        #self.result_label.config(text=f"Нажатие на \n({frame.x}, {frame.y})")
+        print(f"Нажатие на \n({frame.x}, {frame.y})")
 
     def add_frame_to_canvas(self, frame):
         frame.id = self.canvas.create_rectangle(
@@ -202,8 +269,18 @@ class ModularHomeBuilder(tk.Tk):
         self.temp_tochki.append(r_u)
         self.temp_tochki.append(r_d)
 
+        self.temp_sides.append((l_d, l_u))
+        self.temp_sides.append((l_u, r_u))
+        self.temp_sides.append((r_d, r_u))
+        self.temp_sides.append((l_d, r_d))
+
+
 
         print(self.temp_tochki)
+        self.calculate_free_sides()
+        print("Free sides: ", self.free_sides)
+        self.calculate_and_display_results()
+
 
 
 
