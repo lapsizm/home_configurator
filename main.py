@@ -11,6 +11,14 @@ class ModularFrame:
         self.height = height
         self.id = None  # ID элемента на канвасе
 
+class Wall:
+    def init(self, left_out, consists_from_short, num_of_frames, right_out):
+        self.left_out = left_out
+        self.consists_from_short = consists_from_short
+        self.num_of_frames = num_of_frames
+        self.right_out = right_out
+
+
 class ModularHomeBuilder(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -78,27 +86,64 @@ class ModularHomeBuilder(tk.Tk):
                         # TODO: добавить проверку на огромный разрыв и соответствие
                         d_y[self.free_sides[i][0][1]].append(self.free_sides[j])
 
+        sorted_dict = dict()
+        for key in d_y.keys():
+            sorted_dict[key] = sorted(d_y[key], key=lambda x: x[0][0])
+
+        d_y = sorted_dict
+
+        sorted_dict = dict()
+        for key in d_x.keys():
+            sorted_dict[key] = sorted(d_x[key], key=lambda x: x[0][1])
+
+        d_x = sorted_dict
+
+        count_side = 0
+        for k, v in d_y.items():
+            temp = [[], [], [], [], [] , [], [], [], []]
+            for i in range(len(v) - 1):
+                temp[count_side].append(v[i])
+                if v[i][1][0] != v[i + 1][0][0]:
+                    count_side += 1
+            temp[count_side].append(v[-1])
+            temp = list(filter(lambda x: x != [], temp))
+            d_y[k] = temp
+
+        count_side = 0
+        for k, v in d_x.items():
+            temp = [[], [], [], [], [], [], [], [], []]
+            for i in range(len(v) - 1):
+                temp[count_side].append(v[i])
+                if v[i][0][1] != v[i + 1][1][1]:
+                    count_side += 1
+            temp[count_side].append(v[-1])
+            temp = list(filter(lambda x: x != [], temp))
+            d_x[k] = temp
 
 
-        print(d_x)
-        print(d_y)
+
+
 
         arr_short = [None,0,0,0,0,0,0,0]
+        s = f''
 
+        print("with static x")
         for el in d_x.values():
             print(el)
-            count = len(el)
-            arr_short[count] += 1
+            for el_j in el:
+                count = len(el_j)
+                arr_short[count] += 1
 
         arr_long = [None, 0, 0, 0, 0, 0, 0, 0]
 
+        print("with static y")
         for el in d_y.values():
-            count = len(el)
-            arr_long[count] += 1
-            print(arr_long)
+            print(el)
+            for el_j in el:
+                count = len(el_j)
+                arr_long[count] += 1
 
 
-        s = f''
         for i in range(1, len(arr_short)):
             if arr_short[i] > 0:
                 s += f'{i} внешних коротких - {arr_short[i]} штук\n'
@@ -106,7 +151,66 @@ class ModularHomeBuilder(tk.Tk):
         for i in range(1, len(arr_long)):
             if arr_long[i] > 0:
                 s += f'{i} внешних длинных - {arr_long[i]} штук\n'
-                print(s)
+
+        min_x = min(self.temp_tochki, key=lambda p: p[0])[0]
+        min_y = min(self.temp_tochki, key=lambda p: p[1])[1]
+
+        while d_x or d_y:
+            if d_x:
+                first_side = d_x[min_x][0]
+
+                wall = Wall()
+                left_p = first_side[0][1]
+                right_p = first_side[-1][0]
+                if self.temp_tochki.count(left_p) == 1:
+                    wall.left_out = True
+                else:
+                    wall.left_out = False
+                if self.temp_tochki.count(right_p) == 1:
+                    wall.right_out = True
+                else:
+                    wall.right_out = False
+                wall.consists_from_short = True
+                wall.num_of_frames = len(first_side)
+                s += f'{(wall.left_out, wall.consists_from_short, wall.num_of_frames, wall.right_out)}\n'
+
+                min_y = first_side[-1][0][1]
+                if min_y not in d_y:
+                    min_y = first_side[0][1][1]
+                d_x[min_x].remove(first_side)
+                if d_x[min_x] is None or len(d_x[min_x]) == 0:
+                    del d_x[min_x]
+            if d_y:
+                second_side = d_y[min_y][0]
+
+                wall = Wall()
+                left_p = second_side[0][0]
+                right_p = second_side[-1][1]
+                if self.temp_tochki.count(left_p) == 1:
+                    wall.left_out = True
+                else:
+                    wall.left_out = False
+                if self.temp_tochki.count(right_p) == 1:
+                    wall.right_out = True
+                else:
+                    wall.right_out = False
+                wall.consists_from_short = False
+                wall.num_of_frames = len(second_side)
+                s += f'{(wall.left_out, wall.consists_from_short, wall.num_of_frames, wall.right_out)}\n'
+
+                min_x = second_side[-1][1][0]
+                if min_x not in d_x:
+                    min_x = second_side[0][0][0]
+                d_y[min_y].remove(second_side)
+                if d_y[min_y] is None or len(d_y[min_y]) == 0:
+                    del d_y[min_y]
+
+
+
+
+
+
+
 
         return s
 
@@ -119,7 +223,9 @@ class ModularHomeBuilder(tk.Tk):
         self.add_frame_to_canvas(initial_frame)
 
     def canvas_click_handler(self, event):
-        clicked_item = self.canvas.find_closest(event.x, event.y)[0]
+        clicked_item = self.canvas.find_closest(event.x, event.y, 5)[0]
+        print(event.x, event.y, clicked_item)
+        print("CLICKED", clicked_item)
         self.select_frame(clicked_item)
 
     def canvas_right_click_handler(self, event):
@@ -157,9 +263,6 @@ class ModularHomeBuilder(tk.Tk):
             else:
                 self.canvas.itemconfig(frame.id, fill="lightgray")
 
-
-
-
     def delete_frame(self, clicked_item):
         for index, frame in enumerate(self.frames):
             if frame.id == clicked_item:
@@ -175,14 +278,24 @@ class ModularHomeBuilder(tk.Tk):
                 r_d = (round(frame.x + frame.width / 2, 3), round(frame.y + frame.height / 2, 3))
 
                 if self.temp_tochki.count(l_d) > 1 and self.temp_tochki.count(l_u) > 1 or self.temp_tochki.count(r_u) > 1 and self.temp_tochki.count(r_d) > 1:
-                    self.short_soed -= 1
+                    if self.short_soed > 0:
+                        self.short_soed -= 1
                 if self.temp_tochki.count(l_d) > 1 and self.temp_tochki.count(r_d) > 1 or self.temp_tochki.count(l_u) > 1 and self.temp_tochki.count(r_u) > 1:
-                    self.long_soed -= 1
+                    if self.long_soed > 0:
+                        self.long_soed -= 1
 
                 self.temp_tochki.remove(l_d)
                 self.temp_tochki.remove(l_u)
                 self.temp_tochki.remove(r_d)
                 self.temp_tochki.remove(r_u)
+
+                self.temp_sides.remove((l_d, l_u))
+                self.temp_sides.remove((l_u, r_u))
+                self.temp_sides.remove((r_d, r_u))
+                self.temp_sides.remove((l_d, r_d))
+                self.calculate_free_sides()
+                self.calculate_and_display_results()
+
                 break
 
     def show_direction_buttons(self, frame):
@@ -275,8 +388,6 @@ class ModularHomeBuilder(tk.Tk):
         self.temp_sides.append((l_d, r_d))
 
 
-
-        print(self.temp_tochki)
         self.calculate_free_sides()
         print("Free sides: ", self.free_sides)
         self.calculate_and_display_results()
