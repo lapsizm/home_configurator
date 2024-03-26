@@ -40,6 +40,9 @@ class ModularHomeBuilder(tk.Tk):
         self.short_soed = 0
         self.long_soed = 0
 
+        self.width = 60.55
+        self.height = 24.35
+
         self.result_label = tk.Label(self, text="")
         self.result_label.pack(side=tk.TOP, pady=10)
 
@@ -59,6 +62,7 @@ class ModularHomeBuilder(tk.Tk):
         s = f'Узлы: {repetitions_count}\nКороткие соединения: {self.short_soed}\nДлинные соединения: {self.long_soed}\nКол-во блоков: {int(len(self.temp_tochki)/4)}\n'
         s += self.calculate_external_sides()
         self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
+        return s
 
 
     def calculate_free_sides(self):
@@ -127,18 +131,18 @@ class ModularHomeBuilder(tk.Tk):
         arr_short = [None,0,0,0,0,0,0,0]
         s = f''
 
-        print("with static x")
+        #print("with static x")
         for el in d_x.values():
-            print(el)
+            #print(el)
             for el_j in el:
                 count = len(el_j)
                 arr_short[count] += 1
 
         arr_long = [None, 0, 0, 0, 0, 0, 0, 0]
 
-        print("with static y")
+        #print("with static y")
         for el in d_y.values():
-            print(el)
+            #print(el)
             for el_j in el:
                 count = len(el_j)
                 arr_long[count] += 1
@@ -160,7 +164,16 @@ class ModularHomeBuilder(tk.Tk):
 
         while d_x or d_y:
             if d_x:
-                first_side = d_x[min_x][-1]
+                if direction_x == -1:
+                    if direction_y == -1:
+                        first_side = d_x[min_x][0]
+                    else:
+                        first_side = d_x[min_x][-1]
+                elif direction_x == 1:
+                    if direction_y == -1:
+                        first_side = d_x[min_x][0]
+                    elif direction_y == 1:
+                        first_side = d_x[min_x][-1]
 
                 wall = Wall()
                 left_p = first_side[0][1] # up
@@ -191,8 +204,12 @@ class ModularHomeBuilder(tk.Tk):
                 wall.num_of_frames = len(first_side)
                 s += f'{(wall.left_out, wall.consists_from_short, wall.num_of_frames, wall.right_out)}\n'
 
-                min_y = first_side[-1][0][1]
-                temp_x = first_side[-1][0][0]
+                if direction_x == 1:
+                    min_y = first_side[-1][0][1]
+                    temp_x = first_side[-1][0][0]
+                elif direction_x == -1:
+                    min_y = first_side[0][1][1]
+                    temp_x = first_side[0][1][0]
 
                 if min_y not in d_y:
                     min_y = first_side[0][1][1]
@@ -200,7 +217,7 @@ class ModularHomeBuilder(tk.Tk):
 
                 d_x[min_x].remove(first_side)
 
-                if ((round(temp_x - self.frames[0].width,3), min_y), (temp_x, min_y)) not in self.free_sides:
+                if ((round(temp_x - self.width,3), min_y), (temp_x, min_y)) not in self.free_sides:
                     direction_y = 1
                 else:
                     direction_y = -1
@@ -210,7 +227,13 @@ class ModularHomeBuilder(tk.Tk):
 
 
             if d_y:
-                second_side = d_y[min_y][0]
+                if direction_y == -1:
+                    if direction_x == 1:
+                        second_side = d_y[min_y][0]
+                    else:
+                        second_side = d_y[min_y][-1]
+                else:
+                    second_side = d_y[min_y][0]
 
                 wall = Wall()
                 left_p = second_side[0][0] # left
@@ -240,26 +263,27 @@ class ModularHomeBuilder(tk.Tk):
                 wall.num_of_frames = len(second_side)
                 s += f'{(wall.left_out, wall.consists_from_short, wall.num_of_frames, wall.right_out)}\n'
 
-                min_x = second_side[-1][1][0]
-                temp_y = second_side[-1][1][1]
+
+
+                if direction_y == 1:
+                    min_x = second_side[-1][1][0]
+                    temp_y = second_side[-1][1][1]
+                elif direction_y == -1:
+                    min_x = second_side[0][0][0]
+                    temp_y = second_side[0][0][1]
+
                 if min_x not in d_x:
                     min_x = second_side[0][0][0]
                     temp_y = second_side[0][0][1]
                 d_y[min_y].remove(second_side)
 
-                if ((min_x, round(temp_y + self.frames[0].height, 3)), (min_x, temp_y)) not in self.free_sides:
+                if ((min_x, round(temp_y + self.height, 3)), (min_x, temp_y)) not in self.free_sides:
                     direction_x = -1
                 else:
                     direction_x = 1
 
                 if d_y[min_y] is None or len(d_y[min_y]) == 0:
                     del d_y[min_y]
-
-
-
-
-
-
 
 
         return s
@@ -346,6 +370,10 @@ class ModularHomeBuilder(tk.Tk):
                 self.calculate_free_sides()
                 self.calculate_and_display_results()
 
+                print("TEMP_TOCHKI: ", self.temp_tochki)
+                print("TEMP_SIDES: ", self.temp_sides)
+                print("TEMP_FRAMES: ", self.frames)
+
                 break
 
     def show_direction_buttons(self, frame):
@@ -403,6 +431,23 @@ class ModularHomeBuilder(tk.Tk):
         #self.result_label.config(text=f"Нажатие на \n({frame.x}, {frame.y})")
         print(f"Нажатие на \n({frame.x}, {frame.y})")
 
+    def calculate_internal_sides(self):
+        self.short_soed = 0
+        self.long_soed = 0
+        for i in range(0, len(self.temp_tochki) - 4, 4):
+            l_d = self.temp_tochki[0 + i]
+            l_u = self.temp_tochki[1 + i]
+            r_u = self.temp_tochki[2 + i]
+            r_d = self.temp_tochki[3 + i]
+            if self.temp_sides.count((l_d, l_u)) == 2:
+                self.short_soed += 1
+            if self.temp_sides.count((r_d, r_u)) == 2:
+                self.short_soed += 1
+            if self.temp_sides.count((l_d, r_d)) == 2:
+                self.long_soed += 1
+            if self.temp_sides.count((l_u, r_u)) == 2:
+                self.long_soed += 1
+
     def add_frame_to_canvas(self, frame):
         frame.id = self.canvas.create_rectangle(
             frame.x - frame.width / 2, frame.y - frame.height / 2,
@@ -437,10 +482,13 @@ class ModularHomeBuilder(tk.Tk):
         self.temp_sides.append((r_d, r_u))
         self.temp_sides.append((l_d, r_d))
 
+        print("temp.temp_tochki = ", self.temp_tochki)
+        print("temp.temp_sides = ", self.temp_sides)
 
         self.calculate_free_sides()
         print("Free sides: ", self.free_sides)
-        self.calculate_and_display_results()
+        s = self.calculate_and_display_results()
+        print(s)
 
 
 
