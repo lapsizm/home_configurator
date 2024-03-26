@@ -144,64 +144,114 @@ class ModularHomeBuilder(tk.Tk):
                 arr_long[count] += 1
 
 
-        for i in range(1, len(arr_short)):
-            if arr_short[i] > 0:
-                s += f'{i} внешних коротких - {arr_short[i]} штук\n'
-
-        for i in range(1, len(arr_long)):
-            if arr_long[i] > 0:
-                s += f'{i} внешних длинных - {arr_long[i]} штук\n'
+        # for i in range(1, len(arr_short)):
+        #     if arr_short[i] > 0:
+        #         s += f'{i} внешних коротких - {arr_short[i]} штук\n'
+        #
+        # for i in range(1, len(arr_long)):
+        #     if arr_long[i] > 0:
+        #         s += f'{i} внешних длинных - {arr_long[i]} штук\n'
 
         min_x = min(self.temp_tochki, key=lambda p: p[0])[0]
         min_y = min(self.temp_tochki, key=lambda p: p[1])[1]
 
+        direction_x = 1
+        direction_y = 1
+
         while d_x or d_y:
             if d_x:
-                first_side = d_x[min_x][0]
+                first_side = d_x[min_x][-1]
 
                 wall = Wall()
-                left_p = first_side[0][1]
-                right_p = first_side[-1][0]
+                left_p = first_side[0][1] # up
+                right_p = first_side[-1][0] #down
                 if self.temp_tochki.count(left_p) == 1:
-                    wall.left_out = True
+                    if direction_x == -1:
+                        wall.right_out = True
+                    else:
+                        wall.left_out = True
                 else:
-                    wall.left_out = False
+                    if direction_x == -1:
+                        wall.right_out = False
+                    else:
+                        wall.left_out = False
+
                 if self.temp_tochki.count(right_p) == 1:
-                    wall.right_out = True
+                    if direction_x == -1:
+                        wall.left_out = True
+                    else:
+                        wall.right_out = True
                 else:
-                    wall.right_out = False
+                    if direction_x == -1:
+                        wall.left_out = False
+                    else:
+                        wall.right_out = False
+
                 wall.consists_from_short = True
                 wall.num_of_frames = len(first_side)
                 s += f'{(wall.left_out, wall.consists_from_short, wall.num_of_frames, wall.right_out)}\n'
 
                 min_y = first_side[-1][0][1]
+                temp_x = first_side[-1][0][0]
+
                 if min_y not in d_y:
                     min_y = first_side[0][1][1]
+                    temp_x = first_side[0][1][0]
+
                 d_x[min_x].remove(first_side)
+
+                if ((round(temp_x - self.frames[0].width,3), min_y), (temp_x, min_y)) not in self.free_sides:
+                    direction_y = 1
+                else:
+                    direction_y = -1
+
                 if d_x[min_x] is None or len(d_x[min_x]) == 0:
                     del d_x[min_x]
+
+
             if d_y:
                 second_side = d_y[min_y][0]
 
                 wall = Wall()
-                left_p = second_side[0][0]
-                right_p = second_side[-1][1]
+                left_p = second_side[0][0] # left
+                right_p = second_side[-1][1] #right
                 if self.temp_tochki.count(left_p) == 1:
-                    wall.left_out = True
+                    if direction_y == -1:
+                        wall.right_out = True
+                    else:
+                        wall.left_out = True
                 else:
-                    wall.left_out = False
+                    if direction_y == -1:
+                        wall.right_out = False
+                    else:
+                        wall.left_out = False
+
                 if self.temp_tochki.count(right_p) == 1:
-                    wall.right_out = True
+                    if direction_y == -1:
+                        wall.left_out = True
+                    else:
+                        wall.right_out = True
                 else:
-                    wall.right_out = False
+                    if direction_y == -1:
+                        wall.left_out = False
+                    else:
+                        wall.right_out = False
                 wall.consists_from_short = False
                 wall.num_of_frames = len(second_side)
                 s += f'{(wall.left_out, wall.consists_from_short, wall.num_of_frames, wall.right_out)}\n'
 
                 min_x = second_side[-1][1][0]
+                temp_y = second_side[-1][1][1]
                 if min_x not in d_x:
                     min_x = second_side[0][0][0]
+                    temp_y = second_side[0][0][1]
                 d_y[min_y].remove(second_side)
+
+                if ((min_x, round(temp_y + self.frames[0].height, 3)), (min_x, temp_y)) not in self.free_sides:
+                    direction_x = -1
+                else:
+                    direction_x = 1
+
                 if d_y[min_y] is None or len(d_y[min_y]) == 0:
                     del d_y[min_y]
 
