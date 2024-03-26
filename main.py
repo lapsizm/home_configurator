@@ -434,19 +434,25 @@ class ModularHomeBuilder(tk.Tk):
     def calculate_internal_sides(self):
         self.short_soed = 0
         self.long_soed = 0
+        already = []
         for i in range(0, len(self.temp_tochki) - 4, 4):
             l_d = self.temp_tochki[0 + i]
             l_u = self.temp_tochki[1 + i]
             r_u = self.temp_tochki[2 + i]
             r_d = self.temp_tochki[3 + i]
-            if self.temp_sides.count((l_d, l_u)) == 2:
+            if self.temp_sides.count((l_d, l_u)) == 2 and (l_d, l_u) not in already:
                 self.short_soed += 1
-            if self.temp_sides.count((r_d, r_u)) == 2:
+                already.append((l_d, l_u))
+            if self.temp_sides.count((r_d, r_u)) == 2 and (r_d, r_u) not in already:
                 self.short_soed += 1
-            if self.temp_sides.count((l_d, r_d)) == 2:
+                already.append((r_d, r_u))
+            if self.temp_sides.count((l_d, r_d)) == 2 and (l_d, r_d) not in already:
                 self.long_soed += 1
-            if self.temp_sides.count((l_u, r_u)) == 2:
+                already.append((l_d, r_d))
+            if self.temp_sides.count((l_u, r_u)) == 2 and (l_u, r_u) not in already:
                 self.long_soed += 1
+                already.append((l_u, r_u))
+
 
     def add_frame_to_canvas(self, frame):
         frame.id = self.canvas.create_rectangle(
