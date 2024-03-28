@@ -64,12 +64,190 @@ class ModularHomeBuilder(tk.Tk):
         self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
         return s
 
+    def is_vertical(self, side):
+        if side[0][0] == side[1][0]:
+            return True
+        return False
+    def is_horizontal(self, side):
+        if side[0][1] == side[1][1]:
+            return True
+        return False
+
+    def there_is_ring(self):
+        temp_right_sides = []
+        for el in self.free_sides:
+            if self.is_vertical(el):
+                if self.is_right_side(el):
+                    temp_right_sides.append(el)
+
+        for el in temp_right_sides:
+            temp_lower = el[0]
+            temp_upper = el[1]
+            const_lower = temp_lower
+            const_upper = temp_upper
+            my_side = (temp_lower, temp_upper)
+            direction_x = 1
+            direction_y = 0
+            # TODO: check with round !!!!!!!11
+            while True:
+                if direction_x == 1:
+                    temp_x = temp_lower[0] + self.width
+                    temp_y = temp_lower[1]
+                    if (temp_lower, (temp_x, temp_y)) in self.free_sides:
+                        temp_upper = (temp_x, temp_y)
+                        direction_y = 1
+                    elif ((temp_lower[0] - self.width, temp_y), temp_lower) in self.free_sides:
+                        temp_upper = temp_lower
+                        temp_lower = (temp_lower[0] - self.width, temp_y)
+                        direction_y = -1
+                    elif ((temp_lower[0], temp_lower[1] + self.width), temp_lower) in self.free_sides:
+                        temp_upper = temp_lower
+                        temp_lower = (temp_lower[0], temp_lower[1] + self.width)
+                        direction_y = 0
+
+                elif direction_x == -1:
+                    temp_x = temp_upper[0] - self.width
+                    temp_y = temp_upper[1]
+                    if ((temp_x, temp_y), temp_upper) in self.free_sides:
+                        direction_y = -1
+                        temp_lower = (temp_x, temp_y)
+                    elif (temp_upper, (temp_upper[0] + self.width, temp_upper[1])) in self.free_sides:
+                        direction_y = 1
+                        temp_lower = temp_upper
+                        temp_upper = (temp_upper[0] + self.width, temp_upper[1])
+                    elif (temp_upper, (temp_upper[0], temp_upper[1] - self.width)) in self.free_sides:
+                        direction_y = 0
+                        temp_lower = temp_upper
+                        temp_upper = (temp_upper[0], temp_upper[1] - self.width)
+                elif direction_x == 0:
+                    print("skip")
+
+                if temp_lower == const_upper:
+                    return True
+                elif temp_upper == const_upper:
+                    print("fuck")
+                    break
+
+                if direction_y == 1:
+                    temp_x = temp_upper[0]
+                    temp_y = temp_upper[1] - self.height
+                    if (temp_upper, (temp_x, temp_y)) in self.free_sides:
+                        direction_x = -1
+                        temp_lower = temp_upper
+                        temp_upper = (temp_x, temp_y)
+                    elif (temp_upper, (temp_upper[0],  temp_upper[1] + self.height)) in self.free_sides:
+                        direction_x = 1
+                        temp_lower = temp_upper
+                        temp_upper = (temp_upper[0],  temp_upper[1] + self.height)
+                    elif (temp_upper, (temp_upper[0] + self.width,  temp_upper[1])) in self.free_sides:
+                        direction_x = 0
+                        temp_lower = temp_upper
+                        temp_upper = (temp_upper[0] + self.width,  temp_upper[1])
+                elif direction_y == -1:
+                    if ((temp_lower[0], temp_lower[0] + self.height), temp_lower) in self.free_sides:
+                        direction_x = 1
+                        temp_lower = (temp_lower[0], temp_lower[0] + self.height)
+                        temp_upper = temp_lower
+                    elif (temp_lower, (temp_lower[0], temp_lower[0] - self.height)) in self.free_sides:
+                        direction_x = -1
+                        temp_lower = temp_lower
+                        temp_upper = (temp_lower[0], temp_lower[0] - self.height)
+                    elif ((temp_lower[0] - self.width, temp_lower[1]), temp_lower) in self.free_sides:
+                        direction_x = 0
+                        temp_lower = (temp_lower[0] - self.width, temp_lower[1])
+                        temp_upper = temp_lower
+
+        return False
+
+
+
+
+    def is_left_side(self, side):
+        lower_tochka = side[0]
+        upper_tochka = side[1]
+        flag_lower = False
+        flag_upper = False
+        for i in range(0, len(self.temp_tochki) - 4, 4):
+            if self.temp_tochki[i] == lower_tochka:
+                flag_lower = True
+                break
+        for i in range(1, len(self.temp_tochki) - 4, 4):
+            if self.temp_tochki[i] == upper_tochka:
+                flag_upper = True
+                break
+
+        if flag_lower and flag_upper:
+            return True
+        else:
+            return False
+
+    def is_right_side(self, side):
+        lower_tochka = side[0]
+        upper_tochka = side[1]
+        flag_lower = False
+        flag_upper = False
+        for i in range(3, len(self.temp_tochki) - 4, 4):
+            if self.temp_tochki[i] == lower_tochka:
+                flag_lower = True
+                break
+        for i in range(2, len(self.temp_tochki) - 4, 4):
+            if self.temp_tochki[i] == upper_tochka:
+                flag_upper = True
+                break
+
+        if flag_lower and flag_upper:
+            return True
+        else:
+            return False
+
+    def is_upper_side(self, side):
+        left_tochka = side[0]
+        right_tochka = side[1]
+        flag_left = False
+        flag_right = False
+        for i in range(1, len(self.temp_tochki) - 4, 4):
+            if self.temp_tochki[i] == left_tochka:
+                flag_left = True
+                break
+        for i in range(2, len(self.temp_tochki) - 4, 4):
+            if self.temp_tochki[i] == right_tochka:
+                flag_right = True
+                break
+
+        if flag_left and flag_right:
+            return True
+        else:
+            return False
+
+    def is_lower_side(self, side):
+        left_tochka = side[0]
+        right_tochka = side[1]
+        flag_left = False
+        flag_right = False
+        for i in range(0, len(self.temp_tochki) - 4, 4):
+            if self.temp_tochki[i] == left_tochka:
+                flag_left = True
+                break
+        for i in range(3, len(self.temp_tochki) - 4, 4):
+            if self.temp_tochki[i] == right_tochka:
+                flag_right = True
+                break
+
+        if flag_left and flag_right:
+            return True
+        else:
+            return False
+
+
 
     def calculate_free_sides(self):
         self.free_sides = []
         for el in self.temp_sides:
             if self.temp_sides.count(el) == 1:
                 self.free_sides.append(el)
+
+        # flag = self.there_is_ring()
+        # print(flag)
 
 
     def calculate_external_sides(self):
