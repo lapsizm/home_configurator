@@ -161,10 +161,14 @@ class ModularHomeBuilder(tk.Tk):
 
         direction_x = 1
         direction_y = 1
+        start_flag = True
 
         while d_x or d_y:
             if d_x:
-                if direction_x == -1:
+                if start_flag:
+                    first_side = d_x[min_x][0]
+                    start_flag = False
+                elif direction_x == -1:
                     if direction_y == -1:
                         first_side = d_x[min_x][0]
                     else:
@@ -233,7 +237,10 @@ class ModularHomeBuilder(tk.Tk):
                     else:
                         second_side = d_y[min_y][-1]
                 else:
-                    second_side = d_y[min_y][0]
+                    if direction_x == -1:
+                        second_side = d_y[min_y][-1]
+                    else:
+                        second_side = d_y[min_y][0]
 
                 wall = Wall()
                 left_p = second_side[0][0] # left
