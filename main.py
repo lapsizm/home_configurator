@@ -91,34 +91,34 @@ class ModularHomeBuilder(tk.Tk):
             # TODO: check with round !!!!!!!11
             while True:
                 if direction_x == 1:
-                    temp_x = temp_lower[0] + self.width
+                    temp_x = round(temp_lower[0] + self.width,3)
                     temp_y = temp_lower[1]
                     if (temp_lower, (temp_x, temp_y)) in self.free_sides:
                         temp_upper = (temp_x, temp_y)
                         direction_y = 1
-                    elif ((temp_lower[0] - self.width, temp_y), temp_lower) in self.free_sides:
+                    elif ((round(temp_lower[0] - self.width,3), temp_y), temp_lower) in self.free_sides:
                         temp_upper = temp_lower
-                        temp_lower = (temp_lower[0] - self.width, temp_y)
+                        temp_lower = (round(temp_lower[0] - self.width,3), temp_y)
                         direction_y = -1
-                    elif ((temp_lower[0], temp_lower[1] + self.width), temp_lower) in self.free_sides:
+                    elif ((temp_lower[0], round(temp_lower[1] + self.height,3)), temp_lower) in self.free_sides:
                         temp_upper = temp_lower
-                        temp_lower = (temp_lower[0], temp_lower[1] + self.width)
+                        temp_lower = (temp_lower[0], round(temp_lower[1] + self.height,3))
                         direction_y = 0
 
                 elif direction_x == -1:
-                    temp_x = temp_upper[0] - self.width
+                    temp_x = round(temp_upper[0] - self.width,3)
                     temp_y = temp_upper[1]
                     if ((temp_x, temp_y), temp_upper) in self.free_sides:
                         direction_y = -1
                         temp_lower = (temp_x, temp_y)
-                    elif (temp_upper, (temp_upper[0] + self.width, temp_upper[1])) in self.free_sides:
+                    elif (temp_upper, (round(temp_upper[0] + self.width,3), temp_upper[1])) in self.free_sides:
                         direction_y = 1
                         temp_lower = temp_upper
-                        temp_upper = (temp_upper[0] + self.width, temp_upper[1])
-                    elif (temp_upper, (temp_upper[0], temp_upper[1] - self.width)) in self.free_sides:
+                        temp_upper = (round(temp_upper[0] + self.width,3), temp_upper[1])
+                    elif (temp_upper, (temp_upper[0], round(temp_upper[1] - self.height,3))) in self.free_sides:
                         direction_y = 0
                         temp_lower = temp_upper
-                        temp_upper = (temp_upper[0], temp_upper[1] - self.width)
+                        temp_upper = (temp_upper[0], round(temp_upper[1] - self.height,3))
                 elif direction_x == 0:
                     print("skip")
 
@@ -130,31 +130,31 @@ class ModularHomeBuilder(tk.Tk):
 
                 if direction_y == 1:
                     temp_x = temp_upper[0]
-                    temp_y = temp_upper[1] - self.height
-                    if (temp_upper, (temp_x, temp_y)) in self.free_sides:
+                    temp_y = round(temp_upper[1] + self.height,3)
+                    if ((temp_x, temp_y), temp_upper) in self.free_sides:
+                        direction_x = 1
+                        temp_lower = (temp_x, temp_y)
+                        temp_upper = temp_upper
+                    elif (temp_upper, (temp_upper[0],  round(temp_upper[1] - self.height,3))) in self.free_sides:
                         direction_x = -1
                         temp_lower = temp_upper
-                        temp_upper = (temp_x, temp_y)
-                    elif (temp_upper, (temp_upper[0],  temp_upper[1] + self.height)) in self.free_sides:
-                        direction_x = 1
-                        temp_lower = temp_upper
-                        temp_upper = (temp_upper[0],  temp_upper[1] + self.height)
-                    elif (temp_upper, (temp_upper[0] + self.width,  temp_upper[1])) in self.free_sides:
+                        temp_upper = (temp_upper[0],  round(temp_upper[1] - self.height,3))
+                    elif (temp_upper, (round(temp_upper[0] + self.width,3),  temp_upper[1])) in self.free_sides:
                         direction_x = 0
                         temp_lower = temp_upper
-                        temp_upper = (temp_upper[0] + self.width,  temp_upper[1])
+                        temp_upper = (round(temp_upper[0] + self.width,3),  temp_upper[1])
                 elif direction_y == -1:
-                    if ((temp_lower[0], temp_lower[0] + self.height), temp_lower) in self.free_sides:
-                        direction_x = 1
-                        temp_lower = (temp_lower[0], temp_lower[0] + self.height)
-                        temp_upper = temp_lower
-                    elif (temp_lower, (temp_lower[0], temp_lower[0] - self.height)) in self.free_sides:
+                    if (temp_lower, (temp_lower[0], round(temp_lower[1] - self.height,3))) in self.free_sides:
                         direction_x = -1
                         temp_lower = temp_lower
-                        temp_upper = (temp_lower[0], temp_lower[0] - self.height)
-                    elif ((temp_lower[0] - self.width, temp_lower[1]), temp_lower) in self.free_sides:
+                        temp_upper = (temp_lower[0], round(temp_lower[1] - self.height,3))
+                    elif ((temp_lower[0], round(temp_lower[1] + self.height,3)), temp_lower) in self.free_sides:
+                        direction_x = 1
+                        temp_lower = (temp_lower[0], round(temp_lower[1] + self.height,3))
+                        temp_upper = temp_lower
+                    elif ((round(temp_lower[0] - self.width,3), temp_lower[1]), temp_lower) in self.free_sides:
                         direction_x = 0
-                        temp_lower = (temp_lower[0] - self.width, temp_lower[1])
+                        temp_lower = (round(temp_lower[0] - self.width,3), temp_lower[1])
                         temp_upper = temp_lower
 
         return False
@@ -167,11 +167,11 @@ class ModularHomeBuilder(tk.Tk):
         upper_tochka = side[1]
         flag_lower = False
         flag_upper = False
-        for i in range(0, len(self.temp_tochki) - 4, 4):
+        for i in range(0, len(self.temp_tochki), 4):
             if self.temp_tochki[i] == lower_tochka:
                 flag_lower = True
                 break
-        for i in range(1, len(self.temp_tochki) - 4, 4):
+        for i in range(1, len(self.temp_tochki), 4):
             if self.temp_tochki[i] == upper_tochka:
                 flag_upper = True
                 break
@@ -186,11 +186,11 @@ class ModularHomeBuilder(tk.Tk):
         upper_tochka = side[1]
         flag_lower = False
         flag_upper = False
-        for i in range(3, len(self.temp_tochki) - 4, 4):
+        for i in range(3, len(self.temp_tochki), 4):
             if self.temp_tochki[i] == lower_tochka:
                 flag_lower = True
                 break
-        for i in range(2, len(self.temp_tochki) - 4, 4):
+        for i in range(2, len(self.temp_tochki), 4):
             if self.temp_tochki[i] == upper_tochka:
                 flag_upper = True
                 break
@@ -205,11 +205,11 @@ class ModularHomeBuilder(tk.Tk):
         right_tochka = side[1]
         flag_left = False
         flag_right = False
-        for i in range(1, len(self.temp_tochki) - 4, 4):
+        for i in range(1, len(self.temp_tochki), 4):
             if self.temp_tochki[i] == left_tochka:
                 flag_left = True
                 break
-        for i in range(2, len(self.temp_tochki) - 4, 4):
+        for i in range(2, len(self.temp_tochki), 4):
             if self.temp_tochki[i] == right_tochka:
                 flag_right = True
                 break
@@ -224,11 +224,11 @@ class ModularHomeBuilder(tk.Tk):
         right_tochka = side[1]
         flag_left = False
         flag_right = False
-        for i in range(0, len(self.temp_tochki) - 4, 4):
+        for i in range(0, len(self.temp_tochki), 4):
             if self.temp_tochki[i] == left_tochka:
                 flag_left = True
                 break
-        for i in range(3, len(self.temp_tochki) - 4, 4):
+        for i in range(3, len(self.temp_tochki), 4):
             if self.temp_tochki[i] == right_tochka:
                 flag_right = True
                 break

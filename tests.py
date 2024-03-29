@@ -329,11 +329,11 @@ result_s = """Узлы: {4: 2, 3: 4, 2: 8, 1: 8}
 (True, False, 4, True)
 """
 
-if s != result_s:
+if s != result_s or temp.there_is_ring():
     differ = difflib.Differ()
     diff = list(differ.compare(s.splitlines(), result_s.splitlines()))
 
-    print("TEST8 ERROR")
+    print("TEST10 ERROR")
     print('\n'.join(diff))
 
 else:
@@ -370,7 +370,7 @@ result_s = """Узлы: {4: 2, 3: 4, 2: 8, 1: 8}
 (False, False, 1, True)
 """
 
-if s != result_s:
+if s != result_s or temp.there_is_ring():
     differ = difflib.Differ()
     diff = list(differ.compare(s.splitlines(), result_s.splitlines()))
 
@@ -381,7 +381,7 @@ else:
     print("TEST11 COMPLETED")
 
 
-# TEST13
+# TEST12
 # * * *
 # *   *
 # * * *
@@ -391,9 +391,9 @@ temp.temp_sides =  [((364.725, 250.175), (364.725, 225.825)), ((364.725, 225.825
 temp.calculate_free_sides()
 flag = temp.there_is_ring()
 if flag != True:
-    print("TEST13 ERROR")
+    print("TEST12 ERROR")
 else:
-    print("TEST13 COMPLETED")
+    print("TEST12 COMPLETED")
 
 
 
