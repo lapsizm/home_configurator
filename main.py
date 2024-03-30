@@ -89,7 +89,10 @@ class ModularHomeBuilder(tk.Tk):
             direction_x = 1
             direction_y = 0
             # TODO: check with round !!!!!!!11
+            arr_of_sides = []
             while True:
+                arr_of_sides.append((temp_lower,temp_upper))
+
                 if direction_x == 1:
                     temp_x = round(temp_lower[0] + self.width,3)
                     temp_y = temp_lower[1]
@@ -119,26 +122,29 @@ class ModularHomeBuilder(tk.Tk):
                         direction_y = 0
                         temp_lower = temp_upper
                         temp_upper = (temp_upper[0], round(temp_upper[1] - self.height,3))
-                elif direction_x == 0:
-                    print("skip")
 
-                if temp_lower == const_upper:
+                if len(arr_of_sides) == len(self.free_sides):
+                    break
+                elif temp_lower == const_upper and direction_x == -1 and direction_y == -1:
+                    arr_of_sides.append((temp_lower, temp_upper))
+                    print(arr_of_sides)
                     return True
-                elif temp_upper == const_upper:
-                    print("fuck")
+                elif temp_upper == const_upper or (temp_lower, temp_upper) == (const_lower, const_upper):
+                    #print("fuck")
                     break
 
+                arr_of_sides.append((temp_lower,temp_upper))
                 if direction_y == 1:
                     temp_x = temp_upper[0]
                     temp_y = round(temp_upper[1] + self.height,3)
-                    if ((temp_x, temp_y), temp_upper) in self.free_sides:
-                        direction_x = 1
-                        temp_lower = (temp_x, temp_y)
-                        temp_upper = temp_upper
-                    elif (temp_upper, (temp_upper[0],  round(temp_upper[1] - self.height,3))) in self.free_sides:
+                    if (temp_upper, (temp_upper[0],  round(temp_upper[1] - self.height,3))) in self.free_sides:
                         direction_x = -1
                         temp_lower = temp_upper
                         temp_upper = (temp_upper[0],  round(temp_upper[1] - self.height,3))
+                    elif ((temp_x, temp_y), temp_upper) in self.free_sides:
+                        direction_x = 1
+                        temp_lower = (temp_x, temp_y)
+                        temp_upper = temp_upper
                     elif (temp_upper, (round(temp_upper[0] + self.width,3),  temp_upper[1])) in self.free_sides:
                         direction_x = 0
                         temp_lower = temp_upper
@@ -150,12 +156,23 @@ class ModularHomeBuilder(tk.Tk):
                         temp_upper = (temp_lower[0], round(temp_lower[1] - self.height,3))
                     elif ((temp_lower[0], round(temp_lower[1] + self.height,3)), temp_lower) in self.free_sides:
                         direction_x = 1
-                        temp_lower = (temp_lower[0], round(temp_lower[1] + self.height,3))
                         temp_upper = temp_lower
+                        temp_lower = (temp_lower[0], round(temp_lower[1] + self.height,3))
                     elif ((round(temp_lower[0] - self.width,3), temp_lower[1]), temp_lower) in self.free_sides:
                         direction_x = 0
-                        temp_lower = (round(temp_lower[0] - self.width,3), temp_lower[1])
                         temp_upper = temp_lower
+                        temp_lower = (round(temp_lower[0] - self.width,3), temp_lower[1])
+
+                if len(arr_of_sides) == len(self.free_sides):
+                    break
+                elif temp_lower == const_upper and direction_x == -1 and direction_y == -1:
+                    arr_of_sides.append((temp_lower, temp_upper))
+                    print(arr_of_sides)
+                elif temp_upper == const_upper or (temp_lower, temp_upper) == (const_lower, const_upper):
+                    #print("fuck")
+                    break
+
+
 
         return False
 
