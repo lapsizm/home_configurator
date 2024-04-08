@@ -28,7 +28,7 @@ class ModularHomeBuilder(tk.Tk):
         self.canvas = tk.Canvas(self, bg='white', width=800, height=600)
         self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.canvas.bind("<Button-1>", self.canvas_click_handler)
-        self.canvas.bind("<Button-3>", self.canvas_right_click_handler)  # Правый клик для удаления
+        self.canvas.bind("<Button-2>", self.canvas_right_click_handler)  # Правый клик для удаления
         self.canvas.bind("<Double-1>", self.canvas_double_click_handler)  # Двойной клик для добавления нового стартового модуля
 
         self.frames = []
@@ -131,7 +131,7 @@ class ModularHomeBuilder(tk.Tk):
                     break
                 elif temp_lower == const_upper and (direction_x == -1 and direction_y == -1 or direction_x == 0 and direction_y == -1):
                     arr_of_sides.append((temp_lower, temp_upper))
-                    print(arr_of_sides)
+                    #print(arr_of_sides)
                     self.ring_sides = arr_of_sides
                     return True
                 elif temp_upper == const_upper or (temp_lower, temp_upper) == (const_lower, const_upper):
@@ -173,7 +173,7 @@ class ModularHomeBuilder(tk.Tk):
                     break
                 elif temp_lower == const_upper and (direction_x == -1 and direction_y == -1 or direction_x == 0 and direction_y == -1):
                     arr_of_sides.append((temp_lower, temp_upper))
-                    print(arr_of_sides)
+                    #print(arr_of_sides)
                     self.ring_sides = arr_of_sides
                     return True
                 elif temp_upper == const_upper or (temp_lower, temp_upper) == (const_lower, const_upper):
@@ -488,9 +488,13 @@ class ModularHomeBuilder(tk.Tk):
         return s
 
     def calculate_external_sides(self):
+        if len(self.temp_tochki) == 0:
+            return ""
         if self.there_is_ring():
             for el in self.ring_sides:
                 self.free_sides.remove(el)
+        else:
+            self.ring_sides = []
 
         d_x = dict()
         d_y = dict()
@@ -920,6 +924,7 @@ class ModularHomeBuilder(tk.Tk):
 
         self.calculate_free_sides()
         print("Free sides: ", self.free_sides)
+        s = self.calculate_internal_sides()
         s = self.calculate_and_display_results()
         print(s)
 
