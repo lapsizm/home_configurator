@@ -76,8 +76,8 @@ class ModularHomeBuilder(tk.Tk):
         self.label_radio.pack(side=tk.BOTTOM)
 
         self.repetition_counts = {}
-        self.walls = []
-        self.ring_walls = []
+        self.walls = [[0, []]]
+        self.ring_walls = [[0, []]]
 
         self.height_cok = 0
         self.flag_rams = True
@@ -345,7 +345,7 @@ class ModularHomeBuilder(tk.Tk):
 
 
     def calculate_rings_sides(self):
-        self.ring_walls = []
+        self.ring_walls = [[0, []]]
         d_x = dict()
         d_y = dict()
         for i in range(len(self.ring_sides)):
@@ -437,6 +437,7 @@ class ModularHomeBuilder(tk.Tk):
                     first_side = d_x[min_x][0]
                     start_flag = False
                     s += str(first_side[0][1]) + "\n"
+                    self.ring_walls[0][0] = tuple(first_side[0][1])
                 elif direction_x == -1:
                     if direction_y == -1:
                         first_side = d_x[min_x][0]
@@ -475,7 +476,7 @@ class ModularHomeBuilder(tk.Tk):
 
                 wall.consists_from_short = True
                 wall.num_of_frames = len(first_side)
-                self.ring_walls.append(wall)
+                self.ring_walls[0][1].append(wall)
                 s += f'{(wall.left_out, wall.consists_from_short, wall.num_of_frames, wall.right_out)}\n'
 
                 if direction_x == 1:
@@ -559,10 +560,12 @@ class ModularHomeBuilder(tk.Tk):
                 if d_y[min_y] is None or len(d_y[min_y]) == 0:
                     del d_y[min_y]
 
+        self.ring_walls[0] = tuple(self.ring_walls[0])
+
         return s
 
     def calculate_external_sides(self):
-        self.walls = []
+        self.walls = [[0, []]]
         if len(self.temp_tochki) == 0:
             return ""
         if self.there_is_ring():
@@ -667,6 +670,7 @@ class ModularHomeBuilder(tk.Tk):
                     first_side = d_x[min_x][0]
                     start_flag = False
                     s += str(first_side[0][1]) + "\n"
+                    self.walls[0][0] = tuple(first_side[0][1])
                 elif direction_x == -1:
                     if direction_y == -1:
                         first_side = d_x[min_x][0]
@@ -708,7 +712,7 @@ class ModularHomeBuilder(tk.Tk):
                 wall.consists_from_short = True
                 wall.num_of_frames = len(first_side)
                 s += f'{(wall.left_out, wall.consists_from_short, wall.num_of_frames, wall.right_out)}\n'
-                self.walls.append(wall)
+                self.walls[0][1].append(wall)
 
                 if direction_x == 1:
                     min_y = first_side[-1][0][1]
@@ -797,6 +801,8 @@ class ModularHomeBuilder(tk.Tk):
 
         if len(self.ring_sides) > 0:
             s += self.calculate_rings_sides()
+
+        self.walls[0] = tuple(self.walls[0])
         return s
 
 
@@ -1016,8 +1022,7 @@ class ModularHomeBuilder(tk.Tk):
         #   int(len(self.temp_tochki)/4) -кол-во блоков
 
         print(self.repetitions_count)
-        for el in self.walls:
-            print(el)
+        print(self.walls)
         print(self.ring_walls)
         print(int(len(self.temp_tochki)/4))
         print(self.short_soed)
