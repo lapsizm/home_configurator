@@ -30,7 +30,7 @@ class ModularHomeBuilder(tk.Tk):
         self.canvas.bind("<Button-1>", self.canvas_click_handler)
         self.canvas.bind("<Button-2>", self.canvas_right_click_handler)  # Правый клик для удаления
         self.canvas.bind("<Double-1>", self.canvas_double_click_handler)  # Двойной клик для добавления нового стартового модуля
-
+        self.start_flag = True
         self.frames = []
         self.selected_frame_index = None
         self.temp_tochki = []
@@ -47,18 +47,70 @@ class ModularHomeBuilder(tk.Tk):
         self.result_label = tk.Label(self, text="")
         self.result_label.pack(side=tk.TOP, pady=10)
 
-        self.calculate_button = tk.Button(self, text="Рассчитать", command=self.calculate_and_display_results,
-                                          bg="blue", fg="white", relief=tk.GROOVE, font=("Helvetica", 12, "bold"),
-                                          width=20)
-        self.calculate_button.pack(side=tk.BOTTOM, pady=30, padx=10)
+        button_cokol = tk.Button(self, text="Добавить цоколь", command=self.add_cokol)
+        button_cokol.pack(side=tk.BOTTOM)
+
+        self.cokol = tk.Entry(self, text="hello")
+        self.cokol.pack(side=tk.BOTTOM)
+
+        self.cokol_text =  tk.Label(self, text="")
+        self.cokol_text.pack(side=tk.BOTTOM)
+
+        self.var = tk.IntVar()
+
+        self.yes_radio = tk.Radiobutton(self, text="Нужны рамы", variable=self.var, value=1, command=self.show_choice)
+        self.yes_radio.pack(side = tk.BOTTOM,anchor=tk.W)
+
+        self.no_radio = tk.Radiobutton(self, text="Не нужны рамы", variable=self.var, value=2, command=self.show_choice)
+        self.no_radio.pack(side = tk.BOTTOM,anchor=tk.W)
+
+        self.label_radio = tk.Label(self, text="")
+        self.label_radio.pack(side=tk.BOTTOM)
+
+
+
+        # self.calculate_button = tk.Button(self, text="Рассчитать", command=self.calculate_and_display_results,
+        #                                   bg="blue", fg="white", relief=tk.GROOVE, font=("Helvetica", 12, "bold"),
+        #                                   width=20)
+        # self.calculate_button.pack(side=tk.BOTTOM, pady=30, padx=10)
+
+    def show_choice(self):
+        choice = self.var.get()
+        if choice == 1:
+            self.label_radio.config(text="Вы выбрали: Да")
+        elif choice == 2:
+            self.label_radio.config(text="Вы выбрали: Нет")
+
+    def add_cokol(self):
+        text = "Цоколь: "
+
+        try:
+            cok = int(self.cokol.get())
+            if type(cok) == int:
+                if cok > 0:
+                    text += str(cok)
+                else:
+                    text += "Цоколь должен быть \nбольше 0!"
+        except ValueError:
+            text += "Цоколь должен быть \nчислом!"
+
+        self.cokol_text.config(text=text)
 
     def calculate_and_display_results(self):
         # Реализация расчетов и вывода результатов
         counter = Counter(self.temp_tochki)
 
         repetitions_count = {4: 0, 3: 0, 2: 0, 1: 0}
-        for count in counter.values():
-            repetitions_count[count] += 1
+        for k, v in counter.items():
+            if v == 2:
+                left_s = ((round(k[0] - self.width, 3), k[1]), k)
+                right_s = (k, (round(k[0] + self.width, 3), k[1]))
+                up_s = (k, (k[0], round(k[1] - self.height, 3)))
+                down_s = ((k[0], round(k[1] + self.height, 3)), k)
+                if left_s in self.free_sides and right_s in self.free_sides and up_s in self.free_sides and down_s in self.free_sides:
+                    repetitions_count[1] += 2
+                    continue
+            repetitions_count[v] += 1
 
         s = f'Узлы: {repetitions_count}\nКороткие соединения: {self.short_soed}\nДлинные соединения: {self.long_soed}\nКол-во блоков: {int(len(self.temp_tochki)/4)}\n'
         s += self.calculate_external_sides()
@@ -363,6 +415,7 @@ class ModularHomeBuilder(tk.Tk):
                 if start_flag:
                     first_side = d_x[min_x][0]
                     start_flag = False
+                    s += str(first_side[0][1]) + "\n"
                 elif direction_x == -1:
                     if direction_y == -1:
                         first_side = d_x[min_x][0]
@@ -590,6 +643,7 @@ class ModularHomeBuilder(tk.Tk):
                 if start_flag:
                     first_side = d_x[min_x][0]
                     start_flag = False
+                    s += str(first_side[0][1]) + "\n"
                 elif direction_x == -1:
                     if direction_y == -1:
                         first_side = d_x[min_x][0]
@@ -742,7 +796,9 @@ class ModularHomeBuilder(tk.Tk):
 
     def canvas_double_click_handler(self, event):
         # Обработчик двойного клика для добавления нового стартового модуля
-        self.add_starting_frame(event.x, event.y)
+        if self.start_flag or len(self.temp_tochki) == 0:
+            self.add_starting_frame(event.x, event.y)
+            self.start_flag = False
 
     def add_starting_frame(self, x, y):
         # Добавление нового стартового модуля в указанное место
