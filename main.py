@@ -89,7 +89,6 @@ class ModularHomeBuilder(tk.Tk):
             my_side = (temp_lower, temp_upper)
             direction_x = 1
             direction_y = 0
-            # TODO: check with round !!!!!!!11
             arr_of_sides = []
             start = True
             while True:
@@ -601,6 +600,8 @@ class ModularHomeBuilder(tk.Tk):
                         first_side = d_x[min_x][0]
                     elif direction_y == 1:
                         first_side = d_x[min_x][-1]
+                        if [((min_x, round(temp_y + self.height, 3)), (min_x, temp_y))] in d_x[min_x]:
+                            first_side = [((min_x, round(temp_y + self.height, 3)), (min_x, temp_y))]
 
                 wall = Wall()
                 left_p = first_side[0][1] # up
@@ -658,6 +659,7 @@ class ModularHomeBuilder(tk.Tk):
                     if direction_x == 1:
                         second_side = d_y[min_y][0]
                     else:
+
                         second_side = d_y[min_y][-1]
                 else:
                     if direction_x == -1:
