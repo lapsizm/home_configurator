@@ -47,8 +47,11 @@ class ModularHomeBuilder(tk.Tk):
         self.result_label = tk.Label(self, text="")
         self.result_label.pack(side=tk.TOP, pady=10)
 
-        button_cokol = tk.Button(self, text="Добавить цоколь", command=self.add_cokol)
-        button_cokol.pack(side=tk.BOTTOM)
+        self.button_download = tk.Button(self, text="Выгрузить спецификацию", command=self.download)
+        self.button_download.pack(side=tk.BOTTOM)
+
+        self.button_cokol = tk.Button(self, text="Добавить цоколь", command=self.add_cokol)
+        self.button_cokol.pack(side=tk.BOTTOM)
 
         self.cokol = tk.Entry(self, text="hello")
         self.cokol.pack(side=tk.BOTTOM)
@@ -73,6 +76,10 @@ class ModularHomeBuilder(tk.Tk):
         #                                   bg="blue", fg="white", relief=tk.GROOVE, font=("Helvetica", 12, "bold"),
         #                                   width=20)
         # self.calculate_button.pack(side=tk.BOTTOM, pady=30, padx=10)
+
+    def download(self):
+        pass
+
 
     def show_choice(self):
         choice = self.var.get()
