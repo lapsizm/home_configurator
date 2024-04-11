@@ -79,6 +79,9 @@ class ModularHomeBuilder(tk.Tk):
         self.walls = []
         self.ring_walls = []
 
+        self.height_cok = 0
+        self.flag_rams = True
+
 
         # self.calculate_button = tk.Button(self, text="Рассчитать", command=self.calculate_and_display_results,
         #                                   bg="blue", fg="white", relief=tk.GROOVE, font=("Helvetica", 12, "bold"),
@@ -93,8 +96,10 @@ class ModularHomeBuilder(tk.Tk):
         choice = self.var.get()
         if choice == 1:
             self.label_radio.config(text="Вы выбрали: Да")
+            self.flag_rams = True
         elif choice == 2:
             self.label_radio.config(text="Вы выбрали: Нет")
+            self.flag_rams = False
 
     def add_cokol(self):
         text = "Цоколь: "
@@ -104,6 +109,7 @@ class ModularHomeBuilder(tk.Tk):
             if type(cok) == int:
                 if cok > 0:
                     text += str(cok)
+                    self.height_cok = cok
                 else:
                     text += "Цоколь должен быть \nбольше 0!"
         except ValueError:
@@ -1016,6 +1022,8 @@ class ModularHomeBuilder(tk.Tk):
         print(int(len(self.temp_tochki)/4))
         print(self.short_soed)
         print(self.long_soed)
+        print(self.height_cok) # высота цоколя
+        print(self.flag_rams) # True/false
 
 
 
