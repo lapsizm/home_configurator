@@ -12,6 +12,11 @@ class ModularFrame:
         self.id = None  # ID элемента на канвасе
 
 class Wall:
+    def __init__(self):
+        self.left_out = 0
+        self.consists_from_short = 0
+        self.num_of_frames = 0
+        self.right_out = 0
     def init(self, left_out, consists_from_short, num_of_frames, right_out):
         self.left_out = left_out
         self.consists_from_short = consists_from_short
@@ -70,6 +75,9 @@ class ModularHomeBuilder(tk.Tk):
         self.label_radio = tk.Label(self, text="")
         self.label_radio.pack(side=tk.BOTTOM)
 
+        self.repetition_counts = {}
+        self.walls = []
+        self.ring_walls = []
 
 
         # self.calculate_button = tk.Button(self, text="Рассчитать", command=self.calculate_and_display_results,
@@ -107,7 +115,7 @@ class ModularHomeBuilder(tk.Tk):
         # Реализация расчетов и вывода результатов
         counter = Counter(self.temp_tochki)
 
-        repetitions_count = {4: 0, 3: 0, 2: 0, 1: 0}
+        self.repetitions_count = {4: 0, 3: 0, 2: 0, 1: 0}
         for k, v in counter.items():
             if v == 2:
                 left_s = ((round(k[0] - self.width, 3), k[1]), k)
@@ -117,9 +125,9 @@ class ModularHomeBuilder(tk.Tk):
                 if left_s in self.free_sides and right_s in self.free_sides and up_s in self.free_sides and down_s in self.free_sides:
                     repetitions_count[1] += 2
                     continue
-            repetitions_count[v] += 1
+            self.repetitions_count[v] += 1
 
-        s = f'Узлы: {repetitions_count}\nКороткие соединения: {self.short_soed}\nДлинные соединения: {self.long_soed}\nКол-во блоков: {int(len(self.temp_tochki)/4)}\n'
+        s = f'Узлы: {self.repetitions_count}\nКороткие соединения: {self.short_soed}\nДлинные соединения: {self.long_soed}\nКол-во блоков: {int(len(self.temp_tochki)/4)}\n'
         s += self.calculate_external_sides()
         self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
         return s
@@ -331,7 +339,7 @@ class ModularHomeBuilder(tk.Tk):
 
 
     def calculate_rings_sides(self):
-
+        self.ring_walls = []
         d_x = dict()
         d_y = dict()
         for i in range(len(self.ring_sides)):
@@ -461,6 +469,7 @@ class ModularHomeBuilder(tk.Tk):
 
                 wall.consists_from_short = True
                 wall.num_of_frames = len(first_side)
+                self.ring_walls.append(wall)
                 s += f'{(wall.left_out, wall.consists_from_short, wall.num_of_frames, wall.right_out)}\n'
 
                 if direction_x == 1:
@@ -547,6 +556,7 @@ class ModularHomeBuilder(tk.Tk):
         return s
 
     def calculate_external_sides(self):
+        self.walls = []
         if len(self.temp_tochki) == 0:
             return ""
         if self.there_is_ring():
@@ -692,6 +702,7 @@ class ModularHomeBuilder(tk.Tk):
                 wall.consists_from_short = True
                 wall.num_of_frames = len(first_side)
                 s += f'{(wall.left_out, wall.consists_from_short, wall.num_of_frames, wall.right_out)}\n'
+                self.walls.append(wall)
 
                 if direction_x == 1:
                     min_y = first_side[-1][0][1]
@@ -992,6 +1003,19 @@ class ModularHomeBuilder(tk.Tk):
         s = self.calculate_internal_sides()
         s = self.calculate_and_display_results()
         print(s)
+        #   self.repetitions_count - словарь узлов
+        #   self.walls - список стен
+        #   self.walls - список в кольце
+
+        #   int(len(self.temp_tochki)/4) -кол-во блоков
+
+        print(self.repetitions_count)
+        for el in self.walls:
+            print(el)
+        print(self.ring_walls)
+        print(int(len(self.temp_tochki)/4))
+        print(self.short_soed)
+        print(self.long_soed)
 
 
 
