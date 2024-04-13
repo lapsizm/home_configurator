@@ -3,33 +3,7 @@ from tkinter import messagebox
 from collections import Counter
 from configurator import House
 
-init_frame_number = 1
 
-init_nodes_dic = {
-    "одиночные соединения": 4,
-    "двойные соединения": 0,
-    "тройные соединения": 0,
-    "четверные соединения": 0
-}
-
-init_connections_dic = {
-        "длинные соединения": 0,
-        "короткие соединения": 0
-}
-
-init_walls_list_list = [((0, 0) , [
-        (True, True, 1, True),
-        (True, False, 1, True),
-        (True, True, 1, True),
-        (True, False, 1, True),
-])]
-
-init_basement_hight = 0
-
-init_need_down_frames = False
-
-
-house = House(init_frame_number, init_nodes_dic, init_connections_dic, init_basement_hight, init_need_down_frames)
 
 
 class ModularFrame:
@@ -56,6 +30,36 @@ class Wall:
 
 class ModularHomeBuilder(tk.Tk):
     def __init__(self):
+        self.frame_number = 1
+
+        self.nodes_dic = {
+            "одиночные соединения": 4,
+            "двойные соединения": 0,
+            "тройные соединения": 0,
+            "четверные соединения": 0
+        }
+
+        self.connections_dic = {
+            "длинные соединения": 0,
+            "короткие соединения": 0
+        }
+
+        self.walls_list_list = [((0, 0), [
+            (True, True, 1, True),
+            (True, False, 1, True),
+            (True, True, 1, True),
+            (True, False, 1, True),
+        ])]
+
+        self.basement_hight = 0
+
+        self.need_down_frames = False
+
+        self.house = House(self.frame_number, self.nodes_dic, self.connections_dic, self.basement_hight,
+                      self.need_down_frames)
+
+        self.house.add_wall_list_list(self.walls_list_list)
+
         super().__init__()
         self.title("Modular Home Builder")
         self.geometry("1200x800")
@@ -96,10 +100,11 @@ class ModularHomeBuilder(tk.Tk):
 
         self.var = tk.IntVar()
 
-        self.yes_radio = tk.Radiobutton(self, text="Нужны рамы", variable=self.var, value=1, command=self.show_choice)
+
+        self.yes_radio = tk.Radiobutton(self, text="Рамно-свайный фундамент", variable=self.var, value=1, command=self.show_choice)
         self.yes_radio.pack(side = tk.BOTTOM,anchor=tk.W)
 
-        self.no_radio = tk.Radiobutton(self, text="Не нужны рамы", variable=self.var, value=2, command=self.show_choice)
+        self.no_radio = tk.Radiobutton(self, text="Бетонный фундамент", variable=self.var, value=2, command=self.show_choice)
         self.no_radio.pack(side = tk.BOTTOM,anchor=tk.W)
 
         self.label_radio = tk.Label(self, text="")
@@ -112,7 +117,11 @@ class ModularHomeBuilder(tk.Tk):
         self.ring_walls_start = 0
 
         self.height_cok = 0
-        self.flag_rams = True
+        self.cokol_text.config(text="Высота цоколя: " + str(self.height_cok), fg="blue")
+
+        self.flag_rams = False
+        self.label_radio.config(text="Выбрано: бетонный фундамент", fg="blue")
+        self.var.set(2)
 
 
         # self.calculate_button = tk.Button(self, text="Рассчитать", command=self.calculate_and_display_results,
@@ -121,33 +130,76 @@ class ModularHomeBuilder(tk.Tk):
         # self.calculate_button.pack(side=tk.BOTTOM, pady=30, padx=10)
 
     def download(self):
-        house.create_excel_specification_file()
+        if len(self.temp_tochki) == 0:
+            self.result_label.config(text="Добавьте хотя бы один \n модуль левой кнопкой мыши!",
+                                     font=("Helvetica", 18, "bold"), fg="blue")
+        else:
+            self.house.create_excel_specification_file()
 
 
     def show_choice(self):
         choice = self.var.get()
         if choice == 1:
-            self.label_radio.config(text="Вы выбрали: Да")
+            self.label_radio.config(text="Выбрано: рамно-свайный фундамент", fg="blue")
             self.flag_rams = True
         elif choice == 2:
-            self.label_radio.config(text="Вы выбрали: Нет")
+            self.label_radio.config(text="Выбрано: бетонный фундамент", fg="blue")
             self.flag_rams = False
 
+        s = self.calculate_and_display_results()
+        self.need_down_frames = self.flag_rams
+
+        self.house = House(self.frame_number, self.nodes_dic, self.connections_dic,
+                           self.basement_hight, self.need_down_frames)
+
+        self.house.add_wall_list_list(self.walls_list_list)
+
+        self.house.count_specification()
+        self.house.count_price_and_weight()
+
+        s += ("Вес дома: " + str(
+            self.house.financial_characteristics["Форматированный вес всех комплектов"]) +
+              "кг." + "\n")
+        s += ("Цена дома: " + str(
+            self.house.financial_characteristics["Форматированная розничная цена (с НДС)"]) +
+              "р." + "\n")
+        self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
+
+
     def add_cokol(self):
-        text = "Цоколь: "
+        text = "Высота цоколя: "
 
         try:
             cok = int(self.cokol.get())
             if type(cok) == int:
-                if cok > 0:
+                if cok >= 0:
                     text += str(cok)
                     self.height_cok = cok
+                    s = self.calculate_and_display_results()
+
+                    self.basement_hight = self.height_cok
+
+                    self.house = House(self.frame_number, self.nodes_dic, self.connections_dic,
+                                       self.basement_hight, self.need_down_frames)
+
+                    self.house.add_wall_list_list(self.walls_list_list)
+
+                    self.house.count_specification()
+                    self.house.count_price_and_weight()
+
+                    s += ("Вес дома: " + str(
+                        self.house.financial_characteristics["Форматированный вес всех комплектов"]) +
+                          "кг." + "\n")
+                    s += ("Цена дома: " + str(
+                        self.house.financial_characteristics["Форматированная розничная цена (с НДС)"]) +
+                          "р." + "\n")
+                    self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
                 else:
-                    text += "Цоколь должен быть \nбольше 0!"
+                    text += "Цоколь должен быть \nбольше или равна 0!"
         except ValueError:
             text += "Цоколь должен быть \nчислом!"
 
-        self.cokol_text.config(text=text)
+        self.cokol_text.config(text=text, fg="blue")
 
     def calculate_and_display_results(self):
         # Реализация расчетов и вывода результатов
@@ -899,24 +951,81 @@ class ModularHomeBuilder(tk.Tk):
                 r_u = (round(frame.x + frame.width / 2, 3), round(frame.y - frame.height / 2, 3))
                 r_d = (round(frame.x + frame.width / 2, 3), round(frame.y + frame.height / 2, 3))
 
-                if self.temp_tochki.count(l_d) > 1 and self.temp_tochki.count(l_u) > 1 or self.temp_tochki.count(r_u) > 1 and self.temp_tochki.count(r_d) > 1:
-                    if self.short_soed > 0:
-                        self.short_soed -= 1
-                if self.temp_tochki.count(l_d) > 1 and self.temp_tochki.count(r_d) > 1 or self.temp_tochki.count(l_u) > 1 and self.temp_tochki.count(r_u) > 1:
-                    if self.long_soed > 0:
-                        self.long_soed -= 1
+                # if self.temp_tochki.count(l_d) > 1 and self.temp_tochki.count(l_u) > 1 or self.temp_tochki.count(r_u) > 1 and self.temp_tochki.count(r_d) > 1:
+                #     if self.short_soed > 0:
+                #         self.short_soed -= 1
+                # if self.temp_tochki.count(l_d) > 1 and self.temp_tochki.count(r_d) > 1 or self.temp_tochki.count(l_u) > 1 and self.temp_tochki.count(r_u) > 1:
+                #     if self.long_soed > 0:
+                #         self.long_soed -= 1
 
-                self.temp_tochki.remove(l_d)
-                self.temp_tochki.remove(l_u)
-                self.temp_tochki.remove(r_d)
-                self.temp_tochki.remove(r_u)
 
-                self.temp_sides.remove((l_d, l_u))
-                self.temp_sides.remove((l_u, r_u))
-                self.temp_sides.remove((r_d, r_u))
-                self.temp_sides.remove((l_d, r_d))
+                for i in range(0, len(self.temp_tochki), 4):
+                    if self.temp_tochki[i] == l_d and self.temp_tochki[i + 1] == l_u and self.temp_tochki[i + 2] == r_u and self.temp_tochki[i + 3] == r_d:
+                        self.temp_tochki.pop(i)
+                        self.temp_tochki.pop(i)
+                        self.temp_tochki.pop(i)
+                        self.temp_tochki.pop(i)
+                        break
+
+                for i in range(0, len(self.temp_sides), 4):
+                    if self.temp_sides[i] == (l_d, l_u) and self.temp_sides[i + 1] == (l_u, r_u) and self.temp_sides[i + 2] == (r_d, r_u) and self.temp_sides[i + 3] == (l_d, r_d):
+                        self.temp_sides.pop(i)
+                        self.temp_sides.pop(i)
+                        self.temp_sides.pop(i)
+                        self.temp_sides.pop(i)
+                        break
+
+
                 self.calculate_free_sides()
-                self.calculate_and_display_results()
+
+                self.calculate_internal_sides()
+                s = self.calculate_and_display_results()
+                print(s)
+
+                temp_list_walls = [(self.walls_start,
+                                    [(el.left_out, el.consists_from_short, el.num_of_frames, el.right_out) for el in
+                                     self.walls])]
+                if len(self.ring_walls) != 0:
+                    temp_list_walls.append((self.ring_walls_start,
+                                            [(el.left_out, el.consists_from_short, el.num_of_frames, el.right_out) for
+                                             el in self.walls]))
+                print(temp_list_walls)
+                print(len(self.walls))
+
+                self.frame_number = int(len(self.temp_tochki) / 4)
+
+                self.nodes_dic = {
+                    "одиночные соединения": self.repetitions_count[1],
+                    "двойные соединения": self.repetitions_count[2],
+                    "тройные соединения": self.repetitions_count[3],
+                    "четверные соединения": self.repetitions_count[4]
+                }
+
+                self.connections_dic = {
+                    "длинные соединения": self.long_soed,
+                    "короткие соединения": self.short_soed
+                }
+
+                self.walls_list_list = temp_list_walls
+
+                self.basement_hight = self.height_cok
+
+                self.need_down_frames = self.flag_rams
+
+                self.house = House(self.frame_number, self.nodes_dic, self.connections_dic, self.basement_hight,
+                                   self.need_down_frames)
+
+                self.house.add_wall_list_list(self.walls_list_list)
+
+                self.house.count_specification()
+                self.house.count_price_and_weight()
+                print(self.house.walls_list_list)
+
+                s += "Вес дома: " + str(
+                    self.house.financial_characteristics["Форматированный вес всех комплектов"]) + "кг." + "\n"
+                s += "Цена дома: " + str(
+                    self.house.financial_characteristics["Форматированная розничная цена (с НДС)"]) + "р." + "\n"
+                self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
 
                 print("TEMP_TOCHKI: ", self.temp_tochki)
                 print("TEMP_SIDES: ", self.temp_sides)
@@ -983,23 +1092,25 @@ class ModularHomeBuilder(tk.Tk):
         self.short_soed = 0
         self.long_soed = 0
         already = []
-        for i in range(0, len(self.temp_tochki) - 4, 4):
+        for i in range(0, len(self.temp_tochki), 4):
             l_d = self.temp_tochki[0 + i]
             l_u = self.temp_tochki[1 + i]
             r_u = self.temp_tochki[2 + i]
             r_d = self.temp_tochki[3 + i]
-            if self.temp_sides.count((l_d, l_u)) == 2 and (l_d, l_u) not in already:
+            if self.temp_sides.count((l_d, l_u)) == 2 and ((l_d, l_u) not in already):
                 self.short_soed += 1
                 already.append((l_d, l_u))
-            if self.temp_sides.count((r_d, r_u)) == 2 and (r_d, r_u) not in already:
+            if self.temp_sides.count((r_d, r_u)) == 2 and ((r_d, r_u) not in already):
                 self.short_soed += 1
                 already.append((r_d, r_u))
-            if self.temp_sides.count((l_d, r_d)) == 2 and (l_d, r_d) not in already:
+            if self.temp_sides.count((l_d, r_d)) == 2 and ((l_d, r_d) not in already):
                 self.long_soed += 1
                 already.append((l_d, r_d))
-            if self.temp_sides.count((l_u, r_u)) == 2 and (l_u, r_u) not in already:
+            if self.temp_sides.count((l_u, r_u)) == 2 and ((l_u, r_u) not in already):
                 self.long_soed += 1
                 already.append((l_u, r_u))
+
+        print("HELLO", self.short_soed, self.long_soed)
 
 
     def add_frame_to_canvas(self, frame):
@@ -1021,11 +1132,6 @@ class ModularHomeBuilder(tk.Tk):
         r_u = (round(frame.x + frame.width / 2, 3), round(frame.y - frame.height / 2, 3))
         r_d = (round(frame.x + frame.width / 2, 3), round(frame.y + frame.height / 2, 3))
 
-        if l_d in self.temp_tochki and l_u in self.temp_tochki or r_u in self.temp_tochki and r_d in self.temp_tochki:
-            self.short_soed += 1
-        if l_d in self.temp_tochki and r_d in self.temp_tochki or l_u in self.temp_tochki and r_u in self.temp_tochki:
-            self.long_soed += 1
-
         self.temp_tochki.append(l_d)
         self.temp_tochki.append(l_u)
         self.temp_tochki.append(r_u)
@@ -1041,7 +1147,7 @@ class ModularHomeBuilder(tk.Tk):
 
         self.calculate_free_sides()
         print("Free sides: ", self.free_sides)
-        s = self.calculate_internal_sides()
+        self.calculate_internal_sides()
         s = self.calculate_and_display_results()
         print(s)
         #   self.repetitions_count - словарь узлов
@@ -1061,41 +1167,41 @@ class ModularHomeBuilder(tk.Tk):
 
         temp_list_walls = [(self.walls_start , [(el.left_out, el.consists_from_short, el.num_of_frames, el.right_out) for el in self.walls])]
         if len(self.ring_walls) != 0:
-            temp_list_walls.append((self.ring_walls_start, [(el.left_out, el.consists_from_short, el.num_of_frames, el.right_out) for el in self.walls]))
+            temp_list_walls.append((self.ring_walls_start, [(el.left_out, el.consists_from_short, el.num_of_frames, el.right_out) for el in self.ring_walls]))
         print(temp_list_walls)
         print(len(self.walls))
 
-        init_frame_number = int(len(self.temp_tochki)/4)
+        self.frame_number = int(len(self.temp_tochki)/4)
 
-        init_nodes_dic = {
+        self.nodes_dic = {
             "одиночные соединения": self.repetitions_count[1],
             "двойные соединения": self.repetitions_count[2],
             "тройные соединения": self.repetitions_count[3],
             "четверные соединения": self.repetitions_count[4]
         }
 
-        init_connections_dic = {
+        self.connections_dic = {
             "длинные соединения": self.long_soed,
             "короткие соединения": self.short_soed
         }
 
-        init_walls_list_list = temp_list_walls
+        self.walls_list_list = temp_list_walls
 
-        init_basement_hight = self.height_cok
+        self.basement_hight = self.height_cok
 
-        init_need_down_frames = self.flag_rams
+        self.need_down_frames = self.flag_rams
 
-        house = House(init_frame_number, init_nodes_dic, init_connections_dic, init_basement_hight,
-                      init_need_down_frames)
+        self.house = House(self.frame_number, self.nodes_dic, self.connections_dic, self.basement_hight,
+                      self.need_down_frames)
 
-        house.add_wall_list_list(init_walls_list_list)
+        self.house.add_wall_list_list(self.walls_list_list)
 
-        house.count_specification()
-        house.count_price_and_weight()
-        print(house.walls_list_list)
+        self.house.count_specification()
+        self.house.count_price_and_weight()
+        print(self.house.walls_list_list)
 
-        s += "Вес дома: " + str(house.financial_characteristics["Форматированный вес всех комплектов"]) + "кг." + "\n"
-        s += "Цена дома: " + str(house.financial_characteristics["Форматированная розничная цена (с НДС)"]) + "р." + "\n"
+        s += "Вес дома: " + str(self.house.financial_characteristics["Форматированный вес всех комплектов"]) + "кг." + "\n"
+        s += "Цена дома: " + str(self.house.financial_characteristics["Форматированная розничная цена (с НДС)"]) + "р." + "\n"
         self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
 
 

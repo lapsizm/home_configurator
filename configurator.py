@@ -7,9 +7,6 @@ from openpyxl.styles import Border, Side
 from openpyxl.styles import PatternFill
 
 
-
-
-
 class Wall:
 
     def __init__(self, house, left_out, consists_from_short, num_of_frames, right_out):
@@ -47,7 +44,8 @@ class Wall:
 
         self.batten = {}
 
-        for batten_type in house.specification["Состав комплекта нащельников"]["Характеристики горизонтальных нащельников"].keys():
+        for batten_type in house.specification["Состав комплекта нащельников"][
+            "Характеристики горизонтальных нащельников"].keys():
             self.batten[batten_type] = {}
             self.batten[batten_type]["Левая парная стена по нащельнику этого типа"] = 0
             self.batten[batten_type]["Кол-во саморезов для левого нащельника этого типа"] = 0
@@ -61,7 +59,8 @@ class Wall:
             self.batten[batten_type]["Длина правого нащельника этого типа"] = 0
             self.batten[batten_type]["Правая парная стена по нащельнику этого типа"] = 0
 
-        for batten_type in house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"].keys():
+        for batten_type in house.specification["Состав комплекта нащельников"][
+            "Характеристики вертикальных нащельников"].keys():
             self.batten[batten_type] = {}
             self.batten[batten_type]["Кол-во саморезов для целых нащельников этого типа"] = 0
             self.batten[batten_type]["Кол-во герметиков для целых нащельников этого типа"] = 0
@@ -69,7 +68,6 @@ class Wall:
             self.batten[batten_type]["Кол-во саморезов для верхнего нащельника этого типа"] = 0
             self.batten[batten_type]["Кол-во герметиков для верхнего нащельника этого типа"] = 0
             self.batten[batten_type]["Длина верхнего нащельника этого типа"] = 0
-
 
         self.num_of_foam = 0
         self.gap = 0
@@ -88,48 +86,63 @@ class Wall:
         else:
             self.left_vertical_batten_type = "Нащельник угловой внутренний"
 
-
     def u_shaped_battens_wall_length(self, house):
         wall_length = 0
         if self.left_out:
             wall_length += house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"]
         else:
-            wall_length += house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["зазор между рамами"]
+            wall_length += house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
+                "зазор между рамами"]
 
         if self.consists_from_short:
-            wall_length += self.num_of_frames * house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["ширина"]
+            wall_length += self.num_of_frames * \
+                           house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["ширина"]
         else:
-            wall_length += self.num_of_frames * house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["длина"]
+            wall_length += self.num_of_frames * \
+                           house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["длина"]
 
-        wall_length += (self.num_of_frames - 1) * house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["зазор между рамами"]
+        wall_length += (self.num_of_frames - 1) * \
+                       house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
+                           "зазор между рамами"]
 
         if self.right_out:
             wall_length += house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"]
         else:
-            wall_length += house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["зазор между рамами"]
+            wall_length += house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
+                "зазор между рамами"]
 
         return wall_length
 
     def up_battens_wall_length(self, house):
         wall_length = 0
         if self.left_out:
-            wall_length += (house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] +
-                            house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой"]["выступ нащельника от панели"])
+            wall_length += (
+                        house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] +
+                        house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                            "Нащельник угловой"]["выступ нащельника от панели"])
         else:
-            wall_length += house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["зазор между рамами"]
+            wall_length += house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
+                "зазор между рамами"]
 
         if self.consists_from_short:
-            wall_length += self.num_of_frames * house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["ширина"]
+            wall_length += self.num_of_frames * \
+                           house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["ширина"]
         else:
-            wall_length += self.num_of_frames * house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["длина"]
+            wall_length += self.num_of_frames * \
+                           house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["длина"]
 
-        wall_length += (self.num_of_frames - 1) * house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["зазор между рамами"]
+        wall_length += (self.num_of_frames - 1) * \
+                       house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
+                           "зазор между рамами"]
 
         if self.right_out:
-            wall_length += (house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] +
-                            house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой"]["выступ нащельника от панели"])
+            wall_length += (
+                        house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] +
+                        house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                            "Нащельник угловой"]["выступ нащельника от панели"])
         else:
-            wall_length += house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["зазор между рамами"]
+            wall_length += house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
+                "зазор между рамами"]
 
         return wall_length
 
@@ -137,30 +150,48 @@ class Wall:
         wall_length = 0
         if self.left_out:
             wall_length -= (
-                    house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой"]["ширина"] -
-                    house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] - house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой"]["выступ нащельника от панели"])
+                    house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                        "Нащельник угловой"]["ширина"] -
+                    house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] -
+                    house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                        "Нащельник угловой"]["выступ нащельника от панели"])
         else:
-            wall_length -= (house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой внутренний"]["ширина"] +
-                            house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] +
-                            house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой внутренний"]["выступ нащельника от панели"] -
-                            house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["зазор между рамами"])
+            wall_length -= (
+                        house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                            "Нащельник угловой внутренний"]["ширина"] +
+                        house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] +
+                        house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                            "Нащельник угловой внутренний"]["выступ нащельника от панели"] -
+                        house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
+                            "зазор между рамами"])
 
         if self.consists_from_short:
-            wall_length += self.num_of_frames * house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["ширина"]
+            wall_length += self.num_of_frames * \
+                           house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["ширина"]
         else:
-            wall_length += self.num_of_frames * house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["длина"]
+            wall_length += self.num_of_frames * \
+                           house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["длина"]
 
-        wall_length += (self.num_of_frames - 1) * house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["зазор между рамами"]
+        wall_length += (self.num_of_frames - 1) * \
+                       house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
+                           "зазор между рамами"]
 
         if self.right_out:
             wall_length -= (
-                    house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой"]["ширина"] -
-                    house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] - house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой"]["выступ нащельника от панели"])
+                    house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                        "Нащельник угловой"]["ширина"] -
+                    house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] -
+                    house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                        "Нащельник угловой"]["выступ нащельника от панели"])
         else:
-            wall_length -= (house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой внутренний"]["ширина"] +
-                            house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] +
-                            house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой внутренний"]["выступ нащельника от панели"] -
-                            house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["зазор между рамами"])
+            wall_length -= (
+                        house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                            "Нащельник угловой внутренний"]["ширина"] +
+                        house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] +
+                        house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                            "Нащельник угловой внутренний"]["выступ нащельника от панели"] -
+                        house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
+                            "зазор между рамами"])
 
         return wall_length
 
@@ -168,30 +199,48 @@ class Wall:
         wall_length = 0
         if self.left_out:
             wall_length -= (
-                    house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой"]["ширина"] -
-                    house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] - house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой внутренний"]["выступ нащельника от панели"])
+                    house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                        "Нащельник угловой"]["ширина"] -
+                    house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] -
+                    house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                        "Нащельник угловой внутренний"]["выступ нащельника от панели"])
         else:
-            wall_length -= (house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой внутренний"]["ширина"] +
-                            house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] +
-                            house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой внутренний"]["выступ нащельника от панели"] -
-                            house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["зазор между рамами"])
+            wall_length -= (
+                        house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                            "Нащельник угловой внутренний"]["ширина"] +
+                        house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] +
+                        house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                            "Нащельник угловой внутренний"]["выступ нащельника от панели"] -
+                        house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
+                            "зазор между рамами"])
 
         if self.consists_from_short:
-            wall_length += self.num_of_frames * house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["ширина"]
+            wall_length += self.num_of_frames * \
+                           house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["ширина"]
         else:
-            wall_length += self.num_of_frames * house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["длина"]
+            wall_length += self.num_of_frames * \
+                           house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["длина"]
 
-        wall_length += (self.num_of_frames - 1) * house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["зазор между рамами"]
+        wall_length += (self.num_of_frames - 1) * \
+                       house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
+                           "зазор между рамами"]
 
         if self.right_out:
             wall_length -= (
-                    house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой"]["ширина"] -
-                    house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] - house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой"]["выступ нащельника от панели"])
+                    house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                        "Нащельник угловой"]["ширина"] -
+                    house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] -
+                    house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                        "Нащельник угловой"]["выступ нащельника от панели"])
         else:
-            wall_length -= (house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой внутренний"]["ширина"] +
-                            house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] +
-                            house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"]["Нащельник угловой внутренний"]["выступ нащельника от панели"] -
-                            house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["зазор между рамами"])
+            wall_length -= (
+                        house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                            "Нащельник угловой внутренний"]["ширина"] +
+                        house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["толщина"] +
+                        house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                            "Нащельник угловой внутренний"]["выступ нащельника от панели"] -
+                        house.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
+                            "зазор между рамами"])
 
         return wall_length
 
@@ -200,10 +249,16 @@ class Wall:
             print("Заходит на левый внешний угол")
         else:
             print("Заходит на левый внутренний угол")
-        print("Левая панель:", self.left_panel, "шт. = ", round(self.left_panel * house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["ширина"]), "мм.")
-        print("Целых панелей:", self.num_of_full_panels, "шт. = ", round(self.num_of_full_panels * house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["ширина"]),
+        print("Левая панель:", self.left_panel, "шт. = ", round(
+            self.left_panel * house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
+                "ширина"]), "мм.")
+        print("Целых панелей:", self.num_of_full_panels, "шт. = ", round(
+            self.num_of_full_panels * house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
+                "ширина"]),
               "мм.")
-        print("Правая панель:", self.right_panel, "шт. = ", round(self.right_panel * house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["ширина"]), "мм.")
+        print("Правая панель:", self.right_panel, "шт. = ", round(
+            self.right_panel * house.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
+                "ширина"]), "мм.")
         print("Монтажных пен на эту стену:", self.num_of_foam, "шт. = ", round(self.gap), "мм. зазора")
 
     def horizontal_battens_output(self, batten_type, house):
@@ -220,17 +275,23 @@ class Wall:
         left_batten = self.batten[batten_type]["Длина левого нащельника этого типа"]
 
         print("Левый", batten_type, ":", left_batten, "шт. = ",
-              round(left_batten * house.specification["Состав комплекта нащельников"]["Характеристики горизонтальных нащельников"][batten_type]["длина"]), "мм.")
+              round(left_batten *
+                    house.specification["Состав комплекта нащельников"]["Характеристики горизонтальных нащельников"][
+                        batten_type]["длина"]), "мм.")
 
         num_of_battens = self.batten[batten_type]["Кол-во целых нащельников этого типа"]
 
         print("Целых", batten_type, ":", num_of_battens, "шт. = ",
-              round(num_of_battens * house.specification["Состав комплекта нащельников"]["Характеристики горизонтальных нащельников"][batten_type]["длина"]), "мм.")
+              round(num_of_battens *
+                    house.specification["Состав комплекта нащельников"]["Характеристики горизонтальных нащельников"][
+                        batten_type]["длина"]), "мм.")
 
         right_batten = self.batten[batten_type]["Длина правого нащельника этого типа"]
 
         print("Правый", batten_type, ":", right_batten, "шт. = ",
-              round(right_batten * house.specification["Состав комплекта нащельников"]["Характеристики горизонтальных нащельников"][batten_type]["длина"]), "мм.")
+              round(right_batten *
+                    house.specification["Состав комплекта нащельников"]["Характеристики горизонтальных нащельников"][
+                        batten_type]["длина"]), "мм.")
 
         print("Номер парной по правому", batten_type, "стены",
               self.batten[batten_type]["Правая парная стена по нащельнику этого типа"])
@@ -248,15 +309,18 @@ class Wall:
         num_of_battens = self.batten[self.left_vertical_batten_type]["Кол-во целых нащельников этого типа"]
 
         print("Целых", self.left_vertical_batten_type, ":", num_of_battens, "шт. = ",
-              round(num_of_battens * house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][self.left_vertical_batten_type]["длина"]), "мм.")
+              round(num_of_battens *
+                    house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                        self.left_vertical_batten_type]["длина"]), "мм.")
 
         up_batten = self.batten[self.left_vertical_batten_type]["Длина верхнего нащельника этого типа"]
 
         print("Верхний", self.left_vertical_batten_type, ":", up_batten, "шт. = ",
-              round(up_batten * house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][self.left_vertical_batten_type]["длина"]), "мм.")
+              round(up_batten *
+                    house.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                        self.left_vertical_batten_type]["длина"]), "мм.")
 
         print()
-
 
 
 class House:
@@ -466,8 +530,8 @@ class House:
                                 "cебестоимость за все элементы": 0,
                                 "вес за единицу": 1.601,
                                 "вес всех элементов": 0,
-                        }
-                    },
+                            }
+                        },
                     "Нащельник угловой": 0,
                     "Запас Нащельник угловой": 1,
                     "Нащельник угловой внутренний": 0,
@@ -489,22 +553,22 @@ class House:
                     "Пир-плита": 0,
                     "Запас Пир-плита": 0,
                     "Характеристики Пир-плита":
-                    {
-                        "длина": 3000,
-                        "ширина": 1140,
-                        "толщина": 100,
-                        "кол-во пир-плит на длину рамы": 2,
-                        "минимальная ширина крепления": 42.5,
-                        "зазор при соединении через короткую сторону": 50,
-                        "стандартный зазор": 20,
+                        {
+                            "длина": 3000,
+                            "ширина": 1140,
+                            "толщина": 100,
+                            "кол-во пир-плит на длину рамы": 2,
+                            "минимальная ширина крепления": 42.5,
+                            "зазор при соединении через короткую сторону": 50,
+                            "стандартный зазор": 20,
 
-                        "кол-во в": "шт.",
-                        "артикул": "PP/S-B4-100P3CZ1/FGts/FGts",
-                        "себестоимость за единицу": 5700,
-                        "cебестоимость за все элементы": 0,
-                        "вес за единицу": 14.364,
-                        "вес всех элементов": 0,
-                    },
+                            "кол-во в": "шт.",
+                            "артикул": "PP/S-B4-100P3CZ1/FGts/FGts",
+                            "себестоимость за единицу": 5700,
+                            "cебестоимость за все элементы": 0,
+                            "вес за единицу": 14.364,
+                            "вес всех элементов": 0,
+                        },
 
                     "Себестоимость комплекта": 0,
                     "Вес комплекта": 0,
@@ -583,7 +647,7 @@ class House:
                     "Запас Вкладыш угловой": 1,
                     "Характеристики Вкладыш угловой": {
                         "кол-во на соединение": 2,
-                        "запас": 4/48,
+                        "запас": 4 / 48,
 
                         "кол-во в": "шт.",
                         "артикул": "DHMC972-15-0-0",
@@ -598,7 +662,7 @@ class House:
                     "Характеристики Пластина соединительная": {
                         "кол-во на угловой элемент": 1,
                         "кол-во на одну стойку угловую": 3,
-                        "запас": 2/48,
+                        "запас": 2 / 48,
 
                         "кол-во в": "шт.",
                         "артикул": "DHMC118-4-0-5",
@@ -631,7 +695,7 @@ class House:
                     "Запас Винт М12": 0,
                     "Характеристики Винт М12": {
                         "кол-во на стойку угловую": 6,
-                        "запас": 12/528,
+                        "запас": 12 / 528,
 
                         "кол-во в": "шт.",
                         "артикул": "163-1196",
@@ -646,7 +710,7 @@ class House:
                     "Характеристики Гровер М12": {
                         "кол-во на один болт": 1,
                         "кол-во на один винт": 1,
-                        "запас": 1/36,
+                        "запас": 1 / 36,
 
                         "кол-во в": "шт.",
                         "артикул": "DHM0304",
@@ -660,7 +724,7 @@ class House:
                     "Запас Гайка М12": 0,
                     "Характеристики Гайка М12": {
                         "кол-во на один болт": 2,
-                        "запас": 1/30,
+                        "запас": 1 / 30,
 
                         "кол-во в": "шт.",
                         "артикул": "153-588",
@@ -676,7 +740,7 @@ class House:
                         "кол-во саморезов на верх панели": 3,
                         "кол-во саморезов на низ панели на раму": 3,
                         "кол-во саморезов на низ панели на уголок": 2,
-                        "запас": 1/41,
+                        "запас": 1 / 41,
 
                         "кол-во в": "шт.",
                         "артикул": "164-302",
@@ -840,7 +904,7 @@ class House:
                     "Анкер М12": 0,
                     "Запас Анкер М12": 0,
                     "Характеристики Анкер М12": {
-                        "запас": 4/52,
+                        "запас": 4 / 52,
 
                         "кол-во в": "шт.",
                         "артикул": "DHA",
@@ -875,14 +939,16 @@ class House:
             "Форматированная розничная цена (с НДС)": 0,
         }
         self.house_name = str(round((frame_number *
-                           self.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["длина"] *
-                           self.specification["Состав комплекта рам"]["Характеристики Рама универсальная"]["ширина"] / 1000000)))
+                                     self.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
+                                         "длина"] *
+                                     self.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
+                                         "ширина"] / 1000000)))
 
         self.unic_numbers = (str(nodes_dic["одиночные соединения"]) + str(nodes_dic["двойные соединения"]) +
-                            str(nodes_dic["тройные соединения"]) + str(nodes_dic["четверные соединения"]))
-        self.unic_numbers += "-" + str(connections_dic["длинные соединения"]) + str(connections_dic["короткие соединения"])
+                             str(nodes_dic["тройные соединения"]) + str(nodes_dic["четверные соединения"]))
+        self.unic_numbers += "-" + str(connections_dic["длинные соединения"]) + str(
+            connections_dic["короткие соединения"])
         self.unic_numbers += "-" + str(math.ceil(basement_hight))
-
 
         self.frame_number = frame_number
         self.nodes_dic = nodes_dic
@@ -892,7 +958,6 @@ class House:
 
         self.basement_hight = basement_hight
         self.need_down_frames = need_down_frames
-
 
     def create_excel_specification_file(self):
         number_of_rows = 0
@@ -915,31 +980,30 @@ class House:
         black_side_thin = Side(border_style="thin", color="000000")
         black_side_thick = Side(border_style="thick", color="000000")
 
-        thick_border = Border(left=black_side_thick, right=black_side_thick, top=black_side_thick, bottom=black_side_thick)
+        thick_border = Border(left=black_side_thick, right=black_side_thick, top=black_side_thick,
+                              bottom=black_side_thick)
         thin_border = Border(left=black_side_thin, right=black_side_thin, top=black_side_thin, bottom=black_side_thin)
         no_val_border = Border(top=black_side_thin, bottom=black_side_thin)
 
         orange_fill = PatternFill(start_color="FFCC99", end_color="FFCC99", fill_type="solid")
 
         init_headers = ["Название:",
-                   "Полная себестоимость всех комплектов (без НДС) в р.:",
-                   "Дилерская цена без скидки  (с НДС) в р.:", "Максимальная скидка в %:",
-                   "Дилерская цена с максимальной скидкой (с НДС) в р.:", "Розничная наценка в %:",
-                   "Розничная цена (с НДС) в р.:", "Вес всех комплектов в кг.:",
-                   "Себестоимость всех комплектов (без НДС) в р.:"]
+                        "Полная себестоимость всех комплектов (без НДС) в р.:",
+                        "Дилерская цена без скидки  (с НДС) в р.:", "Максимальная скидка в %:",
+                        "Дилерская цена с максимальной скидкой (с НДС) в р.:", "Розничная наценка в %:",
+                        "Розничная цена (с НДС) в р.:", "Вес всех комплектов в кг.:",
+                        "Себестоимость всех комплектов (без НДС) в р.:"]
 
         public_set_headers = ["", "", "", "", "",
-                       "", "", "Вес комплекта в кг.:", "Себестоимость комплекта (без НДС) в р.:"]
-
+                              "", "", "Вес комплекта в кг.:", "Себестоимость комплекта (без НДС) в р.:"]
 
         elem_set_headers = ["Название:", "Артикул:", "Кол-во:", "Запас:", "Ед. измерения:",
-                       "Вес ед. в кг.:", "Цена за ед. в р.:", "Общий вес в кг.:",
-                       "Общая себестоимость (без НДС) в р.:"]
+                            "Вес ед. в кг.:", "Цена за ед. в р.:", "Общий вес в кг.:",
+                            "Общая себестоимость (без НДС) в р.:"]
 
         max_number_of_columns = len(init_headers)
         ws.append(init_headers)
         number_of_rows += 1
-
 
         for col in range(1, len(init_headers) + 1):
             cell = ws.cell(row=number_of_rows, column=col)
@@ -950,7 +1014,8 @@ class House:
         for i in range(1, len(init_headers) + 1):
             cell = ws.cell(row=1, column=i)
             if "Название:" in init_headers[i - 1]:
-                ws.column_dimensions[cell.column_letter].width = len("Домокомплект EFFECT Ultra " + self.house_name) - 10
+                ws.column_dimensions[cell.column_letter].width = len(
+                    "Домокомплект EFFECT Ultra " + self.house_name) - 10
             else:
                 if len(init_headers[i - 1]) >= 40:
                     ws.column_dimensions[cell.column_letter].width = len(init_headers[i - 1]) - 25
@@ -961,9 +1026,6 @@ class House:
             cell = ws.cell(row=1, column=i)
             if "Артикул:" in elem_set_headers[i - 1]:
                 ws.column_dimensions[cell.column_letter].width = 25
-
-
-
 
         ws.append(["Домокомплект EFFECT Ultra " + self.house_name,
                    self.financial_characteristics["Полная себестоимость всех комплектов"],
@@ -1001,8 +1063,6 @@ class House:
         ws.append([])
         ws.append([])
         number_of_rows += 2
-
-
 
         for set_name in self.specification.keys():
 
@@ -1052,7 +1112,6 @@ class House:
             ws.append([])
             number_of_rows += 1
 
-
             ws.append(elem_set_headers)
             number_of_rows += 1
 
@@ -1077,7 +1136,8 @@ class House:
                                        self.specification[set_name][type_name][batten_name]["вес за единицу"],
                                        self.specification[set_name][type_name][batten_name]["себестоимость за единицу"],
                                        self.specification[set_name][type_name][batten_name]["вес всех элементов"],
-                                       self.specification[set_name][type_name][batten_name]["cебестоимость за все элементы"]])
+                                       self.specification[set_name][type_name][batten_name][
+                                           "cебестоимость за все элементы"]])
                             number_of_rows += 1
 
                             for i in range(1, len(elem_set_headers) + 1):
@@ -1125,7 +1185,6 @@ class House:
                             cell = ws.cell(row=number_of_rows, column=i)
                             cell.border = thin_border
 
-
             ws.append([])
             ws.append([])
             number_of_rows += 2
@@ -1141,18 +1200,22 @@ class House:
         except Exception as e:
             print("Необходимо закрыть файл для его перезаписи!")
 
-
     def print_price_and_weight(self):
         print("Вес всех комплектов:", self.financial_characteristics["Форматированный вес всех комплектов"], "кг.")
 
         print("Полная себестоимость всех комплектов (без НДС):",
-              "{:,}".format(math.ceil(self.financial_characteristics["Полная себестоимость всех комплектов"])).replace(",", " "), "р.")
+              "{:,}".format(math.ceil(self.financial_characteristics["Полная себестоимость всех комплектов"])).replace(
+                  ",", " "), "р.")
 
         print("Дилерская цена с максимальной скидкой (с НДС):",
-              "{:,}".format(math.ceil(self.financial_characteristics["Дилерская цена с максимальной скидкой (с НДС)"])).replace(",", " "), "р.")
+              "{:,}".format(
+                  math.ceil(self.financial_characteristics["Дилерская цена с максимальной скидкой (с НДС)"])).replace(
+                  ",", " "), "р.")
 
         print("Дилерская цена без скидки  (с НДС):",
-              "{:,}".format(math.ceil(self.financial_characteristics["Дилерская цена без скидки (с НДС)"])).replace(",", " "), "р.")
+              "{:,}".format(math.ceil(self.financial_characteristics["Дилерская цена без скидки (с НДС)"])).replace(",",
+                                                                                                                    " "),
+              "р.")
 
         print("Розничная цена (с НДС):", self.financial_characteristics["Форматированная розничная цена (с НДС)"], "р.")
 
@@ -1162,7 +1225,6 @@ class House:
                 for type_name in self.specification[set_name].keys():
                     if extract_features(type_name, "Характеристики ") != "":
                         for batten_name in self.specification[set_name][type_name]:
-
                             self.specification[set_name][type_name][batten_name]["cебестоимость за все элементы"] = (
                                     self.specification[set_name][type_name][batten_name]["себестоимость за единицу"] *
                                     (self.specification["Состав комплекта нащельников"][batten_name] +
@@ -1218,9 +1280,13 @@ class House:
                  self.financial_characteristics["Расходы Управляющей компании"]))
 
         self.financial_characteristics["Дилерская цена без скидки (с НДС)"] = ((
-                self.financial_characteristics["Полная себестоимость всех комплектов"] /
-                (1 - self.financial_characteristics["Норма прибыли"])) *
-                (1 + self.financial_characteristics["НДС"]))
+                                                                                       self.financial_characteristics[
+                                                                                           "Полная себестоимость всех комплектов"] /
+                                                                                       (1 -
+                                                                                        self.financial_characteristics[
+                                                                                            "Норма прибыли"])) *
+                                                                               (1 + self.financial_characteristics[
+                                                                                   "НДС"]))
 
         self.financial_characteristics["Дилерская цена с максимальной скидкой (с НДС)"] = (
                 self.financial_characteristics["Дилерская цена без скидки (с НДС)"] *
@@ -1228,15 +1294,13 @@ class House:
 
         self.financial_characteristics["Розничная цена (с НДС)"] = (
                 self.financial_characteristics["Дилерская цена без скидки (с НДС)"] * (
-                    1 + self.financial_characteristics["Розничная наценка"]))
-
+                1 + self.financial_characteristics["Розничная наценка"]))
 
         self.financial_characteristics["Форматированный вес всех комплектов"] = (
             "{:,}".format(math.ceil(self.financial_characteristics["Вес всех комплектов"])).replace(",", " "))
 
         self.financial_characteristics["Форматированная розничная цена (с НДС)"] = (
             "{:,}".format(math.ceil(self.financial_characteristics["Розничная цена (с НДС)"])).replace(",", " "))
-
 
     def count_specification(self):
         """
@@ -1246,7 +1310,7 @@ class House:
         print("Панели стеновые:")
         """
         for var_walls_list in self.walls_list_list:
-            #print("Для стены начинающейся с координатами:", var_walls_list[0])
+            # print("Для стены начинающейся с координатами:", var_walls_list[0])
             for wall in var_walls_list[1]:
                 wall.wall_number = var_walls_list[1].index(wall)
 
@@ -1302,8 +1366,6 @@ class House:
               self.specification["Состав комплекта панелей"]["Запас Панель стеновая"])
         """
 
-
-
         basement_panel_hight = self.basement_hight + \
                                self.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
                                    "минимальное крепление сверху"]
@@ -1339,13 +1401,9 @@ class House:
               self.specification["Состав комплекта панелей"]["Запас Панель цокольная"])
         """
 
-
         for var_walls_list in self.walls_list_list:
             for wall in var_walls_list[1]:
                 wall.basement_panel_hight = basement_panel_hight
-
-
-
 
         number_of_pir_plates, number_of_foams = self.count_pir_plates_and_their_foam()
 
@@ -1378,23 +1436,16 @@ class House:
 
         self.count_vertical_battens_and_add_in_spec(vertical_batten_types)
 
-
         if self.need_down_frames:
             self.specification["Состав комплекта рам"]["Рама универсальная"] = self.frame_number * 2
         else:
             self.specification["Состав комплекта рам"]["Рама универсальная"] = self.frame_number
-
-
-
 
         self.specification["Состав комплекта металлоконструкций"]["Стойка угловая"] = (
                 self.frame_number * self.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
             "кол-во угловых стоек"])
 
         self.specification["Состав комплекта металлоконструкций"]["Стойка средняя"] = self.count_middle_racks()
-
-
-
 
         self.specification["Состав комплекта металлоконструкций"]["Вкладыш угловой"] = (
                 (self.nodes_dic["двойные соединения"] + self.nodes_dic["тройные соединения"] * 2 +
@@ -1410,9 +1461,6 @@ class House:
                       self.specification["Состав комплекта металлоконструкций"]["Характеристики Вкладыш угловой"][
                           "запас"]),
                 self.specification["Состав комплекта металлоконструкций"]["Запас Вкладыш угловой"]))
-
-
-
 
         self.specification["Состав комплекта металлоконструкций"]["Пластина соединительная"] = \
             (self.nodes_dic["двойные соединения"] *
@@ -1454,9 +1502,6 @@ class House:
                           "Характеристики Пластина соединительная"]["запас"]),
                 self.specification["Состав комплекта металлоконструкций"]["Запас Пластина соединительная"]))
 
-
-
-
         self.specification["Состав комплекта монтажного"]["Болт М12"] = (
                 self.specification["Состав комплекта металлоконструкций"]["Пластина соединительная"] *
                 self.specification["Состав комплекта монтажного"]["Характеристики Болт М12"][
@@ -1465,9 +1510,6 @@ class House:
         self.specification["Состав комплекта монтажного"]["Запас Болт М12"] = (
             round(self.specification["Состав комплекта монтажного"]["Болт М12"] *
                   self.specification["Состав комплекта монтажного"]["Характеристики Болт М12"]["запас"]))
-
-
-
 
         self.specification["Состав комплекта монтажного"]["Винт М12"] = (
                 self.specification["Состав комплекта металлоконструкций"]["Стойка угловая"] *
@@ -1481,9 +1523,6 @@ class House:
             round(self.specification["Состав комплекта монтажного"]["Винт М12"] *
                   self.specification["Состав комплекта монтажного"]["Характеристики Винт М12"]["запас"]))
 
-
-
-
         self.specification["Состав комплекта монтажного"]["Гровер М12"] = (
                 self.specification["Состав комплекта монтажного"]["Болт М12"] *
                 self.specification["Состав комплекта монтажного"]["Характеристики Гровер М12"]["кол-во на один болт"] +
@@ -1494,9 +1533,6 @@ class House:
             round(self.specification["Состав комплекта монтажного"]["Гровер М12"] *
                   self.specification["Состав комплекта монтажного"]["Характеристики Гровер М12"]["запас"]))
 
-
-
-
         self.specification["Состав комплекта монтажного"]["Гайка М12"] = (
                 self.specification["Состав комплекта монтажного"]["Болт М12"] *
                 self.specification["Состав комплекта монтажного"]["Характеристики Гайка М12"]["кол-во на один болт"])
@@ -1504,9 +1540,6 @@ class House:
         self.specification["Состав комплекта монтажного"]["Запас Гайка М12"] = (
             round(self.specification["Состав комплекта монтажного"]["Гайка М12"] *
                   self.specification["Состав комплекта монтажного"]["Характеристики Гайка М12"]["запас"]))
-
-
-
 
         num_of_panel_screw = self.count_panel_screw()
 
@@ -1519,7 +1552,6 @@ class House:
         print("Саморез 5,5х135:", self.specification["Состав комплекта монтажного"]["Саморез 5,5х135"], '+',
         self.specification["Состав комплекта монтажного"]["Запас Саморез 5,5х135"])
         """
-
 
         self.specification["Состав комплекта монтажного"]["Саморез 4,2х13"] = self.count_all_battens_screw()
 
@@ -1537,7 +1569,6 @@ class House:
               self.specification["Состав комплекта монтажного"]["Запас Герметик"])
         """
 
-
         self.specification["Состав комплекта монтажного"]["Уголок опорный"] = self.count_down_angels()
 
         self.specification["Состав комплекта монтажного"]["Запас Уголок опорный"] = (
@@ -1547,8 +1578,6 @@ class House:
         print("Уголок опорный", self.specification["Состав комплекта монтажного"]["Уголок опорный"], '+',
               self.specification["Состав комплекта монтажного"]["Запас Уголок опорный"])
         """
-
-
 
         self.specification["Состав комплекта монтажного"]["Лента уплотнительная"] = (
             math.ceil(self.count_sealer() / 1000))
@@ -1561,8 +1590,6 @@ class House:
               self.specification["Состав комплекта монтажного"]["Запас Лента уплотнительная"])
         """
 
-
-
         self.specification["Состав комплекта монтажного"]["Анкер М12"] = self.count_anchors()
 
         self.specification["Состав комплекта монтажного"]["Запас Анкер М12"] = (
@@ -1572,7 +1599,6 @@ class House:
         print("Анкер М12", self.specification["Состав комплекта монтажного"]["Анкер М12"], '+',
               self.specification["Состав комплекта монтажного"]["Запас Анкер М12"])
         """
-
 
         self.specification["Состав комплекта монтажного"]["Уплотнитель зазоров"] = (
             math.ceil(self.count_sealant() / 1000))
@@ -1585,7 +1611,6 @@ class House:
               self.specification["Состав комплекта монтажного"]["Запас Уплотнитель зазоров"])
         """
 
-
         self.specification["Состав комплекта монтажного"]["Мастика"] = (math.ceil(self.count_mastic()))
 
         self.specification["Состав комплекта монтажного"]["Запас Мастика"] = (
@@ -1595,7 +1620,6 @@ class House:
         print("Мастика", self.specification["Состав комплекта монтажного"]["Мастика"], '+',
               self.specification["Состав комплекта монтажного"]["Запас Мастика"])
         """
-
 
         self.specification["Состав комплекта монтажного"]["Краска аэрозольная RAL 7016"] = max((
             math.ceil(self.specification["Состав комплекта рам"]["Рама универсальная"] /
@@ -1794,10 +1818,10 @@ class House:
                                      self.specification["Состав комплекта монтажного"]["Характеристики Пена монтажная"][
                                          "объем"])
             wall.num_of_foam += ((wall.gap * (
-                        self.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["длина"] +
-                        self.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
-                            "зазор на стыке"] +
-                        wall.basement_panel_hight) *
+                    self.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"]["длина"] +
+                    self.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
+                        "зазор на стыке"] +
+                    wall.basement_panel_hight) *
                                   self.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
                                       "толщина"]) /
                                  self.specification["Состав комплекта монтажного"]["Характеристики Пена монтажная"][
@@ -1807,8 +1831,7 @@ class House:
 
     def count_horizontal_battens_and_add_in_spec(self, batten_type):
         for var_walls_list in self.walls_list_list:
-            #print("Для стены начинающейся с координатами:", var_walls_list[0])
-
+            # print("Для стены начинающейся с координатами:", var_walls_list[0])
 
             (walls_list, number_of_battens, number_of_jumps, number_of_scopes,
              number_of_small_battens, inverted_min_batten,
@@ -1818,11 +1841,11 @@ class House:
                                     self.walls_list_list]
 
             number_of_battens *= \
-            self.specification["Состав комплекта нащельников"]["Характеристики горизонтальных нащельников"][
-                batten_type]["кол-во слоев в доме"]
+                self.specification["Состав комплекта нащельников"]["Характеристики горизонтальных нащельников"][
+                    batten_type]["кол-во слоев в доме"]
             min_batten = 1 - inverted_min_batten
-            #print()
-            #print(batten_type, ":")
+            # print()
+            # print(batten_type, ":")
 
             """
             for wall in var_walls_list[1]:
@@ -1860,14 +1883,14 @@ class House:
             """
             self.specification["Состав комплекта нащельников"][batten_type] += number_of_battens
 
-            #print()
+            # print()
 
-        #print()
+        # print()
         self.specification["Состав комплекта нащельников"]["Запас " + batten_type] = (
-                max(round(self.specification["Состав комплекта нащельников"][batten_type] *
-                          self.specification["Состав комплекта нащельников"]["Характеристики горизонтальных нащельников"][
-                              batten_type]["запас"]),
-                    self.specification["Состав комплекта нащельников"]["Запас " + batten_type]))
+            max(round(self.specification["Состав комплекта нащельников"][batten_type] *
+                      self.specification["Состав комплекта нащельников"]["Характеристики горизонтальных нащельников"][
+                          batten_type]["запас"]),
+                self.specification["Состав комплекта нащельников"]["Запас " + batten_type]))
         """
         print(batten_type, ":",
               self.specification["Состав комплекта нащельников"][batten_type], '+',
@@ -1953,7 +1976,7 @@ class House:
             number_of_batens[batten_type] = 0
 
         for var_walls_list in self.walls_list_list:
-            #print("Для стены начинающейся с координатами:", var_walls_list[0])
+            # print("Для стены начинающейся с координатами:", var_walls_list[0])
             for wall in var_walls_list[1]:
                 for batten_type in vertical_batten_types:
                     wall_hight = self.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
@@ -2009,7 +2032,7 @@ class House:
 
         for batten_type in vertical_batten_types:
             number_of_battens = number_of_batens[batten_type]
-            #print()
+            # print()
             self.specification["Состав комплекта нащельников"][batten_type] = number_of_battens
             if number_of_battens != 0:
                 self.specification["Состав комплекта нащельников"]["Запас " + batten_type] = (
@@ -2123,8 +2146,10 @@ class House:
                                                     "Характеристики горизонтальных нащельников"][batten_type][
                                                     "шаг крепления"] /
                                                 self.specification["Состав комплекта нащельников"][
-                                                    "Характеристики горизонтальных нащельников"][batten_type]["длина"]) *
-                            self.specification["Состав комплекта нащельников"]["Характеристики горизонтальных нащельников"][
+                                                    "Характеристики горизонтальных нащельников"][batten_type][
+                                                    "длина"]) *
+                            self.specification["Состав комплекта нащельников"][
+                                "Характеристики горизонтальных нащельников"][
                                 batten_type]["кол-во саморезов"])
 
                     wall.batten[batten_type]["Кол-во саморезов для целых нащельников этого типа"] = (
@@ -2133,8 +2158,10 @@ class House:
                                                     "Характеристики горизонтальных нащельников"][batten_type][
                                                     "шаг крепления"] /
                                                 self.specification["Состав комплекта нащельников"][
-                                                    "Характеристики горизонтальных нащельников"][batten_type]["длина"]) *
-                            self.specification["Состав комплекта нащельников"]["Характеристики горизонтальных нащельников"][
+                                                    "Характеристики горизонтальных нащельников"][batten_type][
+                                                    "длина"]) *
+                            self.specification["Состав комплекта нащельников"][
+                                "Характеристики горизонтальных нащельников"][
                                 batten_type]["кол-во саморезов"])
 
                     wall.batten[batten_type]["Кол-во саморезов для правого нащельника этого типа"] = (
@@ -2143,8 +2170,10 @@ class House:
                                                     "Характеристики горизонтальных нащельников"][batten_type][
                                                     "шаг крепления"] /
                                                 self.specification["Состав комплекта нащельников"][
-                                                    "Характеристики горизонтальных нащельников"][batten_type]["длина"]) *
-                            self.specification["Состав комплекта нащельников"]["Характеристики горизонтальных нащельников"][
+                                                    "Характеристики горизонтальных нащельников"][batten_type][
+                                                    "длина"]) *
+                            self.specification["Состав комплекта нащельников"][
+                                "Характеристики горизонтальных нащельников"][
                                 batten_type]["кол-во саморезов"])
 
                     num_of_battens_screw += ((
@@ -2167,7 +2196,8 @@ class House:
                                                     "шаг крепления"] /
                                                 self.specification["Состав комплекта нащельников"][
                                                     "Характеристики вертикальных нащельников"][batten_type]["длина"]) *
-                            self.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                            self.specification["Состав комплекта нащельников"][
+                                "Характеристики вертикальных нащельников"][
                                 batten_type]["кол-во саморезов"])
 
                     wall.batten[batten_type]["Кол-во саморезов для верхнего нащельника этого типа"] = (
@@ -2177,7 +2207,8 @@ class House:
                                                     "шаг крепления"] /
                                                 self.specification["Состав комплекта нащельников"][
                                                     "Характеристики вертикальных нащельников"][batten_type]["длина"]) *
-                            self.specification["Состав комплекта нащельников"]["Характеристики вертикальных нащельников"][
+                            self.specification["Состав комплекта нащельников"][
+                                "Характеристики вертикальных нащельников"][
                                 batten_type]["кол-во саморезов"])
 
                     num_of_battens_screw += (
@@ -2194,8 +2225,8 @@ class House:
                     wall.left_panel_hermetic += (
                             self.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
                                 "кол-во пазов"] * (
-                                        self.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
-                                            "длина"] + wall.basement_panel_hight) /
+                                    self.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
+                                        "длина"] + wall.basement_panel_hight) /
                             self.specification["Состав комплекта монтажного"]["Характеристики Герметик"]["длина шва"])
 
                 if wall.num_of_full_panels != 0:
@@ -2208,11 +2239,11 @@ class House:
 
                 if wall.right_panel != 0:
                     wall.right_panel_hermetic = (
-                                self.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
-                                    "кол-во пазов"] *
-                                (self.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
-                                     "длина"] + wall.basement_panel_hight) /
-                                self.specification["Состав комплекта монтажного"]["Характеристики Герметик"]["длина шва"])
+                            self.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
+                                "кол-во пазов"] *
+                            (self.specification["Состав комплекта панелей"]["Характеристики Панель стеновая"][
+                                 "длина"] + wall.basement_panel_hight) /
+                            self.specification["Состав комплекта монтажного"]["Характеристики Герметик"]["длина шва"])
 
                 num_of_hermetics += wall.left_panel_hermetic + wall.num_of_full_panels_hermetic + wall.right_panel_hermetic
 
@@ -2567,6 +2598,7 @@ class House:
         return (connections_length /
                 self.specification["Состав комплекта монтажного"]["Характеристики Мастика"]["кол-во мм из одного кг"])
 
+
 class ConnectedElem:
     def __init__(self, cur_number):
         self.cur_number = cur_number
@@ -2688,6 +2720,7 @@ def connect_list(elem_list, min_size, overlap_size, start_size, small_size):
 
     return res_list, num_of_elems, number_of_jumps, number_of_scopes, number_of_small_up_battens, inverted_min_up_batten, full_size
 
+
 def create_cyclic_lists(walls_list, initial_size, elem_size, step_size):
     cyclic_lists = []
     for i in range(int((elem_size - initial_size)
@@ -2743,9 +2776,7 @@ def count_battens_screw(init_batten_length, screw_step):
     return num_of_batten_screw
 
 
-
 def extract_features(type_name, spliter):
-
     parts = type_name.split(spliter)
 
     if len(parts) > 1:
@@ -2755,9 +2786,7 @@ def extract_features(type_name, spliter):
         return ""
 
 
-
 if __name__ == "__main__":
-
     basement_hight = int(input("Введите среднюю высоту цоколя в мм:"))
 
     need_down_frames = int(input("Нужны ли нижние рамы: (1 if True/0 if False)"))
@@ -2789,7 +2818,6 @@ if __name__ == "__main__":
 
     house.add_wall_list_list(walls_list_list_29)
     """
-
 
     """
     frame_number_44 = 3
@@ -2841,7 +2869,7 @@ if __name__ == "__main__":
     ])]
 
     house = House(frame_number_59, nodes_dic_59, connections_dic_59, basement_hight, need_down_frames)
-    
+
     house.add_wall_list_list(walls_list_list_59)
     """
 
@@ -2905,7 +2933,6 @@ if __name__ == "__main__":
     house.add_wall_list_list(walls_list_list_88)
     """
 
-
     frame_number_162 = 11
 
     nodes_dic_162 = {
@@ -2920,7 +2947,7 @@ if __name__ == "__main__":
         "короткие соединения": 4
     }
 
-    walls_list_list_162 = [((0, 0) , [
+    walls_list_list_162 = [((0, 0), [
         (True, True, 4, True),
         (True, False, 1, False),
         (False, True, 1, True),
@@ -2940,7 +2967,6 @@ if __name__ == "__main__":
 
     house.add_wall_list_list(walls_list_list_162)
 
-
     house.count_specification()
     house.count_price_and_weight()
 
@@ -2950,7 +2976,7 @@ if __name__ == "__main__":
         s += "Цена дома: " + str(house.financial_characteristics["Форматированная розничная цена (с НДС)"]) + "р." + "\n"
     """
 
-    #при нажатии кнопки выгрузки спецификации должна вызываться эта функция
+    # при нажатии кнопки выгрузки спецификации должна вызываться эта функция
     house.create_excel_specification_file()
 
     j = 0
