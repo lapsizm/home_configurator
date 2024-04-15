@@ -67,7 +67,7 @@ class ModularHomeBuilder(tk.Tk):
         self.canvas = tk.Canvas(self, bg='white', width=800, height=600)
         self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.canvas.bind("<Button-1>", self.canvas_click_handler)
-        self.canvas.bind("<Button-2>", self.canvas_right_click_handler)  # Правый клик для удаления
+        self.canvas.bind("<Button-3>", self.canvas_right_click_handler)  # Правый клик для удаления
         self.canvas.bind("<Double-1>", self.canvas_double_click_handler)  # Двойной клик для добавления нового стартового модуля
         self.start_flag = True
         self.frames = []
@@ -647,6 +647,8 @@ class ModularHomeBuilder(tk.Tk):
 
     def calculate_external_sides(self):
         self.walls = []
+        self.ring_walls = []
+
         if len(self.temp_tochki) == 0:
             return ""
         if self.there_is_ring():
@@ -883,7 +885,6 @@ class ModularHomeBuilder(tk.Tk):
 
         if len(self.ring_sides) > 0:
             s += self.calculate_rings_sides()
-        self.walls
         return s
 
 
@@ -988,9 +989,10 @@ class ModularHomeBuilder(tk.Tk):
                 if len(self.ring_walls) != 0:
                     temp_list_walls.append((self.ring_walls_start,
                                             [(el.left_out, el.consists_from_short, el.num_of_frames, el.right_out) for
-                                             el in self.walls]))
+                                             el in self.ring_walls]))
                 print(temp_list_walls)
-                print(len(self.walls))
+                print("WALLS: ", self.walls)
+                print("RING WALLS: ", self.ring_walls)
 
                 self.frame_number = int(len(self.temp_tochki) / 4)
 
