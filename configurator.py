@@ -937,12 +937,13 @@ class House:
 
             "Форматированный вес всех комплектов": 0,
             "Форматированная розничная цена (с НДС)": 0,
-        }
-        self.house_name = str(round((frame_number *
+            "Форматированная площадь дома": round((frame_number *
                                      self.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
                                          "длина"] *
                                      self.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
-                                         "ширина"] / 1000000)))
+                                         "ширина"] / 1000000)),
+        }
+        self.house_name = str(self.financial_characteristics["Форматированная площадь дома"])
 
         self.unic_numbers = (str(nodes_dic["одиночные соединения"]) + str(nodes_dic["двойные соединения"]) +
                              str(nodes_dic["тройные соединения"]) + str(nodes_dic["четверные соединения"]))
@@ -1301,7 +1302,6 @@ class House:
 
         self.financial_characteristics["Форматированная розничная цена (с НДС)"] = (
             "{:,}".format(math.ceil(self.financial_characteristics["Розничная цена (с НДС)"])).replace(",", " "))
-
     def count_specification(self):
         """
         print()
@@ -2969,6 +2969,7 @@ if __name__ == "__main__":
 
     house.count_specification()
     house.count_price_and_weight()
+    house.print_price_and_weight()
 
     """
     Нужно вывести на экран 
@@ -2977,6 +2978,6 @@ if __name__ == "__main__":
     """
 
     # при нажатии кнопки выгрузки спецификации должна вызываться эта функция
-    house.create_excel_specification_file()
+    #house.create_excel_specification_file()
 
     j = 0

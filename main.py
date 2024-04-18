@@ -67,7 +67,7 @@ class ModularHomeBuilder(tk.Tk):
         self.canvas = tk.Canvas(self, bg='white', width=800, height=600)
         self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.canvas.bind("<Button-1>", self.canvas_click_handler)
-        self.canvas.bind("<Button-3>", self.canvas_right_click_handler)  # Правый клик для удаления
+        self.canvas.bind("<Button-2>", self.canvas_right_click_handler)  # Правый клик для удаления
         self.canvas.bind("<Double-1>", self.canvas_double_click_handler)  # Двойной клик для добавления нового стартового модуля
         self.start_flag = True
         self.frames = []
@@ -114,7 +114,7 @@ class ModularHomeBuilder(tk.Tk):
         self.walls = []
         self.walls_start = 0
         self.ring_walls = []
-        self.ring_walls_start = 0
+        self.ring_walls_start = []
 
         self.height_cok = 0
         self.cokol_text.config(text="Высота цоколя: " + str(self.height_cok), fg="blue")
@@ -122,6 +122,8 @@ class ModularHomeBuilder(tk.Tk):
         self.flag_rams = False
         self.label_radio.config(text="Выбрано: бетонный фундамент", fg="blue")
         self.var.set(2)
+
+        self.flag_ring = False
 
 
         # self.calculate_button = tk.Button(self, text="Рассчитать", command=self.calculate_and_display_results,
@@ -163,6 +165,8 @@ class ModularHomeBuilder(tk.Tk):
         s += ("Цена дома: " + str(
             self.house.financial_characteristics["Форматированная розничная цена (с НДС)"]) +
               "р." + "\n")
+        s += "Площадь дома: " + str(
+            self.house.financial_characteristics["Форматированная площадь дома"]) + " кв. м." + "\n"
         self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
 
 
@@ -193,6 +197,8 @@ class ModularHomeBuilder(tk.Tk):
                     s += ("Цена дома: " + str(
                         self.house.financial_characteristics["Форматированная розничная цена (с НДС)"]) +
                           "р." + "\n")
+                    s += "Площадь дома: " + str(
+                        self.house.financial_characteristics["Форматированная площадь дома"]) + " кв. м." + "\n"
                     self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
                 else:
                     text += "Цоколь должен быть \nбольше или равна 0!"
@@ -237,6 +243,7 @@ class ModularHomeBuilder(tk.Tk):
                 if self.is_right_side(el):
                     temp_right_sides.append(el)
 
+        self.ring_sides = []
         for el in temp_right_sides:
             temp_lower = el[0]
             temp_upper = el[1]
@@ -282,13 +289,15 @@ class ModularHomeBuilder(tk.Tk):
                         temp_lower = temp_upper
                         temp_upper = (temp_upper[0], round(temp_upper[1] - self.height,3))
 
-                if len(arr_of_sides) == len(self.free_sides) - 1:
+                total_elements = sum(len(sub_array) for sub_array in self.ring_sides)
+                if len(arr_of_sides) == len(self.free_sides) - total_elements - 1 or len(arr_of_sides) > len(self.free_sides) // 2:
                     break
                 elif temp_lower == const_upper and (direction_x == -1 and direction_y == -1 or direction_x == 0 and direction_y == -1):
                     arr_of_sides.append((temp_lower, temp_upper))
                     #print(arr_of_sides)
-                    self.ring_sides = arr_of_sides
-                    return True
+                    #self.ring_sides = arr_of_sides
+                    self.ring_sides.append(arr_of_sides)
+                    break
                 elif temp_upper == const_upper or (temp_lower, temp_upper) == (const_lower, const_upper):
                     #print("fuck")
                     break
@@ -324,19 +333,25 @@ class ModularHomeBuilder(tk.Tk):
                         temp_upper = temp_lower
                         temp_lower = (round(temp_lower[0] - self.width,3), temp_lower[1])
 
-                if len(arr_of_sides) == len(self.free_sides) - 1:
+                total_elements = sum(len(sub_array) for sub_array in self.ring_sides)
+                if len(arr_of_sides) == len(self.free_sides) - total_elements - 1:
                     break
                 elif temp_lower == const_upper and (direction_x == -1 and direction_y == -1 or direction_x == 0 and direction_y == -1):
                     arr_of_sides.append((temp_lower, temp_upper))
                     #print(arr_of_sides)
-                    self.ring_sides = arr_of_sides
-                    return True
+                    #self.ring_sides = arr_of_sides
+                    self.ring_sides.append(arr_of_sides)
+                    break
                 elif temp_upper == const_upper or (temp_lower, temp_upper) == (const_lower, const_upper):
                     #print("fuck")
                     break
 
 
-
+        if len(self.ring_sides) != 0:
+            print("THEREISRING: " , self.ring_sides)
+            self.flag_ring = True
+            return True
+        self.flag_ring = False
         return False
 
 
@@ -429,220 +444,201 @@ class ModularHomeBuilder(tk.Tk):
 
     def calculate_rings_sides(self):
         self.ring_walls = []
+        self.ring_walls_start = []
         d_x = dict()
         d_y = dict()
-        for i in range(len(self.ring_sides)):
-            if self.ring_sides[i][0][0] == self.ring_sides[i][1][0] and (self.ring_sides[i][0][0] not in d_x.keys()):
-                d_x[self.ring_sides[i][0][0]] = [self.ring_sides[i]]
-                for j in range(i + 1, len(self.ring_sides)):
-                    if self.ring_sides[j][0][0] == self.ring_sides[j][1][0] == self.ring_sides[i][0][0]:
-                        d_x[self.ring_sides[i][0][0]].append(self.ring_sides[j])
-
-        for i in range(len(self.ring_sides)):
-            if self.ring_sides[i][0][1] == self.ring_sides[i][1][1] and (self.ring_sides[i][0][1] not in d_y.keys()):
-                d_y[self.ring_sides[i][0][1]] = [self.ring_sides[i]]
-                for j in range(i + 1, len(self.ring_sides)):
-                    if self.ring_sides[j][0][1] == self.ring_sides[j][1][1] == self.ring_sides[i][0][1]:
-                        # TODO: добавить проверку на огромный разрыв и соответствие
-                        d_y[self.ring_sides[i][0][1]].append(self.ring_sides[j])
-
-        sorted_dict = dict()
-        for key in d_y.keys():
-            sorted_dict[key] = sorted(d_y[key], key=lambda x: x[0][0])
-
-        d_y = sorted_dict
-
-        sorted_dict = dict()
-        for key in d_x.keys():
-            sorted_dict[key] = sorted(d_x[key], key=lambda x: x[0][1])
-
-        d_x = sorted_dict
-
-        count_side = 0
-        for k, v in d_y.items():
-            temp = [[], [], [], [], [], [], [], [], []]
-            for i in range(len(v) - 1):
-                temp[count_side].append(v[i])
-                if v[i][1][0] != v[i + 1][0][0]:
-                    count_side += 1
-            temp[count_side].append(v[-1])
-            temp = list(filter(lambda x: x != [], temp))
-            d_y[k] = temp
-
-        count_side = 0
-        for k, v in d_x.items():
-            temp = [[], [], [], [], [], [], [], [], []]
-            for i in range(len(v) - 1):
-                temp[count_side].append(v[i])
-                if v[i][0][1] != v[i + 1][1][1]:
-                    count_side += 1
-            temp[count_side].append(v[-1])
-            temp = list(filter(lambda x: x != [], temp))
-            d_x[k] = temp
-
-        arr_short = [None, 0, 0, 0, 0, 0, 0, 0]
         s = f'\n'
 
-        # print("with static x")
-        for el in d_x.values():
-            # print(el)
-            for el_j in el:
-                count = len(el_j)
-                arr_short[count] += 1
+        for el in self.ring_sides:
+            temp_ring_sides = []
+            for i in range(len(el)):
+                if el[i][0][0] == el[i][1][0] and (el[i][0][0] not in d_x.keys()):
+                    d_x[el[i][0][0]] = [el[i]]
+                    for j in range(i + 1, len(el)):
+                        if el[j][0][0] == el[j][1][0] == el[i][0][0]:
+                            d_x[el[i][0][0]].append(el[j])
 
-        arr_long = [None, 0, 0, 0, 0, 0, 0, 0]
+            for i in range(len(el)):
+                if el[i][0][1] == el[i][1][1] and (el[i][0][1] not in d_y.keys()):
+                    d_y[el[i][0][1]] = [el[i]]
+                    for j in range(i + 1, len(el)):
+                        if el[j][0][1] == el[j][1][1] == el[i][0][1]:
+                            # TODO: добавить проверку на огромный разрыв и соответствие
+                            d_y[el[i][0][1]].append(el[j])
 
-        # print("with static y")
-        for el in d_y.values():
-            # print(el)
-            for el_j in el:
-                count = len(el_j)
-                arr_long[count] += 1
+            sorted_dict = dict()
+            for key in d_y.keys():
+                sorted_dict[key] = sorted(d_y[key], key=lambda x: x[0][0])
 
-        # for i in range(1, len(arr_short)):
-        #     if arr_short[i] > 0:
-        #         s += f'{i} внешних коротких - {arr_short[i]} штук\n'
-        #
-        # for i in range(1, len(arr_long)):
-        #     if arr_long[i] > 0:
-        #         s += f'{i} внешних длинных - {arr_long[i]} штук\n'
+            d_y = sorted_dict
 
-        min_x = min(d_x.keys())
-        min_y = min(d_y.keys())
+            sorted_dict = dict()
+            for key in d_x.keys():
+                sorted_dict[key] = sorted(d_x[key], key=lambda x: x[0][1])
 
-        direction_x = 1
-        direction_y = 1
-        start_flag = True
+            d_x = sorted_dict
 
-        while d_x or d_y:
-            if d_x:
-                if start_flag:
-                    first_side = d_x[min_x][0]
-                    start_flag = False
-                    s += str(first_side[0][1]) + "\n"
-                    self.ring_walls_start = first_side[0][1]
-                elif direction_x == -1:
-                    if direction_y == -1:
+            count_side = 0
+            for k, v in d_y.items():
+                temp = [[], [], [], [], [], [], [], [], []]
+                for i in range(len(v) - 1):
+                    temp[count_side].append(v[i])
+                    if v[i][1][0] != v[i + 1][0][0]:
+                        count_side += 1
+                temp[count_side].append(v[-1])
+                temp = list(filter(lambda x: x != [], temp))
+                d_y[k] = temp
+
+            count_side = 0
+            for k, v in d_x.items():
+                temp = [[], [], [], [], [], [], [], [], []]
+                for i in range(len(v) - 1):
+                    temp[count_side].append(v[i])
+                    if v[i][0][1] != v[i + 1][1][1]:
+                        count_side += 1
+                temp[count_side].append(v[-1])
+                temp = list(filter(lambda x: x != [], temp))
+                d_x[k] = temp
+
+
+            min_x = min(d_x.keys())
+            min_y = min(d_y.keys())
+
+            direction_x = 1
+            direction_y = 1
+            start_flag = True
+
+            while d_x or d_y:
+                if d_x:
+                    if start_flag:
                         first_side = d_x[min_x][0]
+                        start_flag = False
+                        #s += str(first_side[0][1]) + "\n"
+                        self.ring_walls_start.append(first_side[0][1])
+                    elif direction_x == -1:
+                        if direction_y == -1:
+                            first_side = d_x[min_x][0]
+                        else:
+                            first_side = d_x[min_x][-1]
+                    elif direction_x == 1:
+                        if direction_y == -1:
+                            first_side = d_x[min_x][0]
+                        elif direction_y == 1:
+                            first_side = d_x[min_x][-1]
+
+                    wall = Wall()
+                    left_p = first_side[0][1]  # up
+                    right_p = first_side[-1][0]  # down
+                    if self.temp_tochki.count(left_p) == 1:
+                        if direction_x == -1:
+                            wall.right_out = True
+                        else:
+                            wall.left_out = True
                     else:
-                        first_side = d_x[min_x][-1]
-                elif direction_x == 1:
-                    if direction_y == -1:
-                        first_side = d_x[min_x][0]
-                    elif direction_y == 1:
-                        first_side = d_x[min_x][-1]
+                        if direction_x == -1:
+                            wall.right_out = False
+                        else:
+                            wall.left_out = False
 
-                wall = Wall()
-                left_p = first_side[0][1]  # up
-                right_p = first_side[-1][0]  # down
-                if self.temp_tochki.count(left_p) == 1:
-                    if direction_x == -1:
-                        wall.right_out = True
+                    if self.temp_tochki.count(right_p) == 1:
+                        if direction_x == -1:
+                            wall.left_out = True
+                        else:
+                            wall.right_out = True
                     else:
-                        wall.left_out = True
-                else:
-                    if direction_x == -1:
-                        wall.right_out = False
-                    else:
-                        wall.left_out = False
+                        if direction_x == -1:
+                            wall.left_out = False
+                        else:
+                            wall.right_out = False
 
-                if self.temp_tochki.count(right_p) == 1:
-                    if direction_x == -1:
-                        wall.left_out = True
-                    else:
-                        wall.right_out = True
-                else:
-                    if direction_x == -1:
-                        wall.left_out = False
-                    else:
-                        wall.right_out = False
+                    wall.consists_from_short = True
+                    wall.num_of_frames = len(first_side)
+                    temp_ring_sides.append(wall)
+                    s += f'{(wall.left_out, wall.consists_from_short, wall.num_of_frames, wall.right_out)}\n'
 
-                wall.consists_from_short = True
-                wall.num_of_frames = len(first_side)
-                self.ring_walls.append(wall)
-                s += f'{(wall.left_out, wall.consists_from_short, wall.num_of_frames, wall.right_out)}\n'
-
-                if direction_x == 1:
-                    min_y = first_side[-1][0][1]
-                    temp_x = first_side[-1][0][0]
-                elif direction_x == -1:
-                    min_y = first_side[0][1][1]
-                    temp_x = first_side[0][1][0]
-
-                if min_y not in d_y:
-                    min_y = first_side[0][1][1]
-                    temp_x = first_side[0][1][0]
-
-                d_x[min_x].remove(first_side)
-
-                if ((round(temp_x - self.width, 3), min_y), (temp_x, min_y)) not in self.ring_sides:
-                    direction_y = 1
-                else:
-                    direction_y = -1
-
-                if d_x[min_x] is None or len(d_x[min_x]) == 0:
-                    del d_x[min_x]
-
-            if d_y:
-                if direction_y == -1:
                     if direction_x == 1:
-                        second_side = d_y[min_y][0]
-                    else:
-                        second_side = d_y[min_y][-1]
-                else:
-                    if direction_x == -1:
-                        second_side = d_y[min_y][-1]
-                    else:
-                        second_side = d_y[min_y][0]
+                        min_y = first_side[-1][0][1]
+                        temp_x = first_side[-1][0][0]
+                    elif direction_x == -1:
+                        min_y = first_side[0][1][1]
+                        temp_x = first_side[0][1][0]
 
-                wall = Wall()
-                left_p = second_side[0][0]  # left
-                right_p = second_side[-1][1]  # right
-                if self.temp_tochki.count(left_p) == 1:
+                    if min_y not in d_y:
+                        min_y = first_side[0][1][1]
+                        temp_x = first_side[0][1][0]
+
+                    d_x[min_x].remove(first_side)
+
+                    if ((round(temp_x - self.width, 3), min_y), (temp_x, min_y)) not in el:
+                        direction_y = 1
+                    else:
+                        direction_y = -1
+
+                    if d_x[min_x] is None or len(d_x[min_x]) == 0:
+                        del d_x[min_x]
+
+                if d_y:
                     if direction_y == -1:
-                        wall.right_out = True
+                        if direction_x == 1:
+                            second_side = d_y[min_y][0]
+                        else:
+                            second_side = d_y[min_y][-1]
                     else:
-                        wall.left_out = True
-                else:
-                    if direction_y == -1:
-                        wall.right_out = False
+                        if direction_x == -1:
+                            second_side = d_y[min_y][-1]
+                        else:
+                            second_side = d_y[min_y][0]
+
+                    wall = Wall()
+                    left_p = second_side[0][0]  # left
+                    right_p = second_side[-1][1]  # right
+                    if self.temp_tochki.count(left_p) == 1:
+                        if direction_y == -1:
+                            wall.right_out = True
+                        else:
+                            wall.left_out = True
                     else:
-                        wall.left_out = False
+                        if direction_y == -1:
+                            wall.right_out = False
+                        else:
+                            wall.left_out = False
 
-                if self.temp_tochki.count(right_p) == 1:
-                    if direction_y == -1:
-                        wall.left_out = True
+                    if self.temp_tochki.count(right_p) == 1:
+                        if direction_y == -1:
+                            wall.left_out = True
+                        else:
+                            wall.right_out = True
                     else:
-                        wall.right_out = True
-                else:
-                    if direction_y == -1:
-                        wall.left_out = False
+                        if direction_y == -1:
+                            wall.left_out = False
+                        else:
+                            wall.right_out = False
+                    wall.consists_from_short = False
+                    wall.num_of_frames = len(second_side)
+                    s += f'{(wall.left_out, wall.consists_from_short, wall.num_of_frames, wall.right_out)}\n'
+                    temp_ring_sides.append(wall)
+
+                    if direction_y == 1:
+                        min_x = second_side[-1][1][0]
+                        temp_y = second_side[-1][1][1]
+                    elif direction_y == -1:
+                        min_x = second_side[0][0][0]
+                        temp_y = second_side[0][0][1]
+
+                    if min_x not in d_x:
+                        min_x = second_side[0][0][0]
+                        temp_y = second_side[0][0][1]
+                    d_y[min_y].remove(second_side)
+
+                    if ((min_x, round(temp_y + self.height, 3)), (min_x, temp_y)) not in el:
+                        direction_x = -1
                     else:
-                        wall.right_out = False
-                wall.consists_from_short = False
-                wall.num_of_frames = len(second_side)
-                s += f'{(wall.left_out, wall.consists_from_short, wall.num_of_frames, wall.right_out)}\n'
-                self.ring_walls.append(wall)
+                        direction_x = 1
 
-                if direction_y == 1:
-                    min_x = second_side[-1][1][0]
-                    temp_y = second_side[-1][1][1]
-                elif direction_y == -1:
-                    min_x = second_side[0][0][0]
-                    temp_y = second_side[0][0][1]
-
-                if min_x not in d_x:
-                    min_x = second_side[0][0][0]
-                    temp_y = second_side[0][0][1]
-                d_y[min_y].remove(second_side)
-
-                if ((min_x, round(temp_y + self.height, 3)), (min_x, temp_y)) not in self.ring_sides:
-                    direction_x = -1
-                else:
-                    direction_x = 1
-
-                if d_y[min_y] is None or len(d_y[min_y]) == 0:
-                    del d_y[min_y]
+                    if d_y[min_y] is None or len(d_y[min_y]) == 0:
+                        del d_y[min_y]
+            self.ring_walls.append(temp_ring_sides)
+            s += "\n"
         return s
 
     def calculate_external_sides(self):
@@ -653,7 +649,8 @@ class ModularHomeBuilder(tk.Tk):
             return ""
         if self.there_is_ring():
             for el in self.ring_sides:
-                self.free_sides.remove(el)
+                for temp_el in el:
+                    self.free_sides.remove(temp_el)
         else:
             self.ring_sides = []
 
@@ -708,37 +705,7 @@ class ModularHomeBuilder(tk.Tk):
             temp = list(filter(lambda x: x != [], temp))
             d_x[k] = temp
 
-
-
-
-
-        arr_short = [None,0,0,0,0,0,0,0]
         s = f''
-
-        #print("with static x")
-        for el in d_x.values():
-            #print(el)
-            for el_j in el:
-                count = len(el_j)
-                arr_short[count] += 1
-
-        arr_long = [None, 0, 0, 0, 0, 0, 0, 0]
-
-        #print("with static y")
-        for el in d_y.values():
-            #print(el)
-            for el_j in el:
-                count = len(el_j)
-                arr_long[count] += 1
-
-
-        # for i in range(1, len(arr_short)):
-        #     if arr_short[i] > 0:
-        #         s += f'{i} внешних коротких - {arr_short[i]} штук\n'
-        #
-        # for i in range(1, len(arr_long)):
-        #     if arr_long[i] > 0:
-        #         s += f'{i} внешних длинных - {arr_long[i]} штук\n'
 
         min_x = min(self.temp_tochki, key=lambda p: p[0])[0]
         min_y = min(self.temp_tochki, key=lambda p: p[1])[1]
@@ -752,16 +719,22 @@ class ModularHomeBuilder(tk.Tk):
                 if start_flag:
                     first_side = d_x[min_x][0]
                     start_flag = False
-                    s += str(first_side[0][1]) + "\n"
+                    #s += str(first_side[0][1]) + "\n"
                     self.walls_start = first_side[0][1]
                 elif direction_x == -1:
                     if direction_y == -1:
                         first_side = d_x[min_x][0]
+                        if first_side[-1][0][1] != temp_y:
+                            first_side = d_x[min_x][-1]
                     else:
                         first_side = d_x[min_x][-1]
+                        if first_side[-1][0][1] != temp_y:
+                            first_side = d_x[min_x][0]
                 elif direction_x == 1:
                     if direction_y == -1:
                         first_side = d_x[min_x][0]
+                        if first_side[-1][0][1] != temp_y:
+                            first_side = d_x[min_x][-1]
                     elif direction_y == 1:
                         first_side = d_x[min_x][-1]
                         if [((min_x, round(temp_y + self.height, 3)), (min_x, temp_y))] in d_x[min_x]:
@@ -941,11 +914,6 @@ class ModularHomeBuilder(tk.Tk):
     def delete_frame(self, clicked_item):
         for index, frame in enumerate(self.frames):
             if frame.id == clicked_item:
-                self.frames.pop(index)
-                self.canvas.delete(clicked_item)
-                self.selected_frame_index = None
-                # Удаляем кнопки направления, если они есть
-                self.canvas.delete("direction_button")
 
                 l_d = (round(frame.x - frame.width / 2, 3), round(frame.y + frame.height / 2, 3))
                 l_u = (round(frame.x - frame.width / 2, 3), round(frame.y - frame.height / 2, 3))
@@ -960,6 +928,40 @@ class ModularHomeBuilder(tk.Tk):
                 #         self.long_soed -= 1
 
 
+                for i in range(0, len(self.temp_sides), 4):
+                    if self.temp_sides[i] == (l_d, l_u) and self.temp_sides[i + 1] == (l_u, r_u) and self.temp_sides[i + 2] == (r_d, r_u) and self.temp_sides[i + 3] == (l_d, r_d):
+                        if self.temp_sides.count((l_d, l_u)) == 2 and self.temp_sides.count((r_d, r_u)) == 2 and self.temp_sides.count((l_u, r_u)) == 2 and self.temp_sides.count((l_d, r_d)) == 2:
+                            self.temp_sides.pop(i)
+                            self.temp_sides.pop(i)
+                            self.temp_sides.pop(i)
+                            self.temp_sides.pop(i)
+                            break
+                        elif self.temp_sides.count((l_d, l_u)) == 2 and self.temp_sides.count((r_d, r_u)) == 2 or self.temp_sides.count((l_u, r_u)) == 2 and self.temp_sides.count((l_d, r_d)) == 2:
+                            if self.flag_ring:
+                                temp_flag = False
+                                for el in self.ring_sides:
+                                    if (l_d, l_u) in el or (r_d, r_u) in el or (l_u, r_u) in el or (l_d, r_d) in el:
+                                        temp_flag = True
+                                        break
+                                if not temp_flag:
+                                    return
+                            else:
+                                return
+                        elif self.temp_sides.count((l_d, l_u)) == 1 and self.temp_sides.count((r_d, r_u)) == 2 and self.temp_sides.count((l_u, r_u)) == 2 and self.temp_sides.count((l_d, r_d)) == 1:
+                            return
+                        elif self.temp_sides.count((l_d, l_u)) == 2 and self.temp_sides.count((r_d, r_u)) == 1 and self.temp_sides.count((l_u, r_u)) == 1 and self.temp_sides.count((l_d, r_d)) == 2:
+                            return
+                        elif self.temp_sides.count((l_d, l_u)) == 1 and self.temp_sides.count((r_d, r_u)) == 2 and self.temp_sides.count((l_u, r_u)) == 1 and self.temp_sides.count((l_d, r_d)) == 2:
+                            return
+                        elif self.temp_sides.count((l_d, l_u)) == 2 and self.temp_sides.count((r_d, r_u)) == 1 and self.temp_sides.count((l_u, r_u)) == 2 and self.temp_sides.count((l_d, r_d)) == 1:
+                            return
+
+                        self.temp_sides.pop(i)
+                        self.temp_sides.pop(i)
+                        self.temp_sides.pop(i)
+                        self.temp_sides.pop(i)
+                        break
+
                 for i in range(0, len(self.temp_tochki), 4):
                     if self.temp_tochki[i] == l_d and self.temp_tochki[i + 1] == l_u and self.temp_tochki[i + 2] == r_u and self.temp_tochki[i + 3] == r_d:
                         self.temp_tochki.pop(i)
@@ -968,13 +970,11 @@ class ModularHomeBuilder(tk.Tk):
                         self.temp_tochki.pop(i)
                         break
 
-                for i in range(0, len(self.temp_sides), 4):
-                    if self.temp_sides[i] == (l_d, l_u) and self.temp_sides[i + 1] == (l_u, r_u) and self.temp_sides[i + 2] == (r_d, r_u) and self.temp_sides[i + 3] == (l_d, r_d):
-                        self.temp_sides.pop(i)
-                        self.temp_sides.pop(i)
-                        self.temp_sides.pop(i)
-                        self.temp_sides.pop(i)
-                        break
+                self.frames.pop(index)
+                self.canvas.delete(clicked_item)
+                self.selected_frame_index = None
+                # Удаляем кнопки направления, если они есть
+                self.canvas.delete("direction_button")
 
 
                 self.calculate_free_sides()
@@ -987,12 +987,12 @@ class ModularHomeBuilder(tk.Tk):
                                     [(el.left_out, el.consists_from_short, el.num_of_frames, el.right_out) for el in
                                      self.walls])]
                 if len(self.ring_walls) != 0:
-                    temp_list_walls.append((self.ring_walls_start,
-                                            [(el.left_out, el.consists_from_short, el.num_of_frames, el.right_out) for
-                                             el in self.ring_walls]))
-                print(temp_list_walls)
-                print("WALLS: ", self.walls)
-                print("RING WALLS: ", self.ring_walls)
+                    for i in range(len(self.ring_walls)):
+                        temp_list_walls.append((self.ring_walls_start[i],
+                                                [(el.left_out, el.consists_from_short, el.num_of_frames, el.right_out) for
+                                                 el in self.ring_walls[i]]))
+                print("LIST OF WALLS: ", temp_list_walls)
+                print("LEN: ", len(temp_list_walls))
 
                 self.frame_number = int(len(self.temp_tochki) / 4)
 
@@ -1027,6 +1027,8 @@ class ModularHomeBuilder(tk.Tk):
                     self.house.financial_characteristics["Форматированный вес всех комплектов"]) + "кг." + "\n"
                 s += "Цена дома: " + str(
                     self.house.financial_characteristics["Форматированная розничная цена (с НДС)"]) + "р." + "\n"
+                s += "Площадь дома: " + str(
+                    self.house.financial_characteristics["Форматированная площадь дома"]) + " кв. м." + "\n"
                 self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
 
                 print("TEMP_TOCHKI: ", self.temp_tochki)
@@ -1112,7 +1114,7 @@ class ModularHomeBuilder(tk.Tk):
                 self.long_soed += 1
                 already.append((l_u, r_u))
 
-        print("HELLO", self.short_soed, self.long_soed)
+        #print("HELLO", self.short_soed, self.long_soed)
 
 
     def add_frame_to_canvas(self, frame):
@@ -1168,10 +1170,16 @@ class ModularHomeBuilder(tk.Tk):
         print(self.flag_rams) # True/false
 
         temp_list_walls = [(self.walls_start , [(el.left_out, el.consists_from_short, el.num_of_frames, el.right_out) for el in self.walls])]
+
         if len(self.ring_walls) != 0:
-            temp_list_walls.append((self.ring_walls_start, [(el.left_out, el.consists_from_short, el.num_of_frames, el.right_out) for el in self.ring_walls]))
-        print(temp_list_walls)
-        print(len(self.walls))
+            for i in range(len(self.ring_walls)):
+                temp_list_walls.append((self.ring_walls_start[i],
+                                        [(el.left_out, el.consists_from_short, el.num_of_frames, el.right_out) for
+                                         el in self.ring_walls[i]]))
+
+
+        print("LIST OF WALLS: ", temp_list_walls)
+        print("LEN: ", len(temp_list_walls))
 
         self.frame_number = int(len(self.temp_tochki)/4)
 
@@ -1204,6 +1212,8 @@ class ModularHomeBuilder(tk.Tk):
 
         s += "Вес дома: " + str(self.house.financial_characteristics["Форматированный вес всех комплектов"]) + "кг." + "\n"
         s += "Цена дома: " + str(self.house.financial_characteristics["Форматированная розничная цена (с НДС)"]) + "р." + "\n"
+        s += "Площадь дома: " + str(
+            self.house.financial_characteristics["Форматированная площадь дома"]) + " кв. м." + "\n"
         self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
 
 
