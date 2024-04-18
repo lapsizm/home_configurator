@@ -67,7 +67,7 @@ class ModularHomeBuilder(tk.Tk):
         self.canvas = tk.Canvas(self, bg='white', width=800, height=600)
         self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.canvas.bind("<Button-1>", self.canvas_click_handler)
-        self.canvas.bind("<Button-2>", self.canvas_right_click_handler)  # Правый клик для удаления
+        self.canvas.bind("<Button-3>", self.canvas_right_click_handler)  # Правый клик для удаления
         self.canvas.bind("<Double-1>", self.canvas_double_click_handler)  # Двойной клик для добавления нового стартового модуля
         self.start_flag = True
         self.frames = []
@@ -911,6 +911,46 @@ class ModularHomeBuilder(tk.Tk):
             else:
                 self.canvas.itemconfig(frame.id, fill="lightgray")
 
+    # def is_important(self, my_frame):
+    #     temp_frames = self.frames.copy()
+    #     temp_frames.pop(self.frames.index(my_frame))
+    #     list_frames = []
+    #     for index, frame in enumerate(temp_frames):
+    #         list_frames.append((round(frame.x, 3), round(frame.y, 3)))
+    #
+    #     if len(list_frames) == 0:
+    #         return False
+    #     length_frames = len(list_frames)
+    #     already_checked = []
+    #     el = list_frames[0]
+    #     while True:
+    #         flag_found = False
+    #         if (el[0] + self.width, el[1]) in list_frames and (el[0] + self.width, el[1]) not in already_checked:
+    #             already_checked.append(el)
+    #             el = (el[0] + self.width, el[1])
+    #             flag_found = True
+    #         elif (el[0] - self.width, el[1]) in list_frames and (el[0] - self.width, el[1]) not in already_checked:
+    #             already_checked.append(el)
+    #             el = (el[0] - self.width, el[1])
+    #             flag_found = True
+    #         elif (el[0], el[1] + self.height) in list_frames and (el[0], el[1] + self.height) not in already_checked:
+    #             already_checked.append(el)
+    #             el = (el[0], el[1] + self.height)
+    #             flag_found = True
+    #         elif (el[0], el[1] - self.height) in list_frames and (el[0], el[1] - self.height) not in already_checked:
+    #             already_checked.append(el)
+    #             el = (el[0], el[1] - self.height)
+    #             flag_found = True
+    #
+    #         if flag_found == False and len(already_checked) == length_frames - 1:
+    #             return False
+    #         if flag_found == False and len(already_checked) < length_frames - 1:
+    #             return True
+
+
+
+
+
     def delete_frame(self, clicked_item):
         for index, frame in enumerate(self.frames):
             if frame.id == clicked_item:
@@ -927,35 +967,12 @@ class ModularHomeBuilder(tk.Tk):
                 #     if self.long_soed > 0:
                 #         self.long_soed -= 1
 
+                # if self.is_important(frame):
+                #     print("IMPORTANT")
+                #     return
 
                 for i in range(0, len(self.temp_sides), 4):
                     if self.temp_sides[i] == (l_d, l_u) and self.temp_sides[i + 1] == (l_u, r_u) and self.temp_sides[i + 2] == (r_d, r_u) and self.temp_sides[i + 3] == (l_d, r_d):
-                        if self.temp_sides.count((l_d, l_u)) == 2 and self.temp_sides.count((r_d, r_u)) == 2 and self.temp_sides.count((l_u, r_u)) == 2 and self.temp_sides.count((l_d, r_d)) == 2:
-                            self.temp_sides.pop(i)
-                            self.temp_sides.pop(i)
-                            self.temp_sides.pop(i)
-                            self.temp_sides.pop(i)
-                            break
-                        elif self.temp_sides.count((l_d, l_u)) == 2 and self.temp_sides.count((r_d, r_u)) == 2 or self.temp_sides.count((l_u, r_u)) == 2 and self.temp_sides.count((l_d, r_d)) == 2:
-                            if self.flag_ring:
-                                temp_flag = False
-                                for el in self.ring_sides:
-                                    if (l_d, l_u) in el or (r_d, r_u) in el or (l_u, r_u) in el or (l_d, r_d) in el:
-                                        temp_flag = True
-                                        break
-                                if not temp_flag:
-                                    return
-                            else:
-                                return
-                        elif self.temp_sides.count((l_d, l_u)) == 1 and self.temp_sides.count((r_d, r_u)) == 2 and self.temp_sides.count((l_u, r_u)) == 2 and self.temp_sides.count((l_d, r_d)) == 1:
-                            return
-                        elif self.temp_sides.count((l_d, l_u)) == 2 and self.temp_sides.count((r_d, r_u)) == 1 and self.temp_sides.count((l_u, r_u)) == 1 and self.temp_sides.count((l_d, r_d)) == 2:
-                            return
-                        elif self.temp_sides.count((l_d, l_u)) == 1 and self.temp_sides.count((r_d, r_u)) == 2 and self.temp_sides.count((l_u, r_u)) == 1 and self.temp_sides.count((l_d, r_d)) == 2:
-                            return
-                        elif self.temp_sides.count((l_d, l_u)) == 2 and self.temp_sides.count((r_d, r_u)) == 1 and self.temp_sides.count((l_u, r_u)) == 2 and self.temp_sides.count((l_d, r_d)) == 1:
-                            return
-
                         self.temp_sides.pop(i)
                         self.temp_sides.pop(i)
                         self.temp_sides.pop(i)
