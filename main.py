@@ -67,7 +67,7 @@ class ModularHomeBuilder(tk.Tk):
         self.canvas = tk.Canvas(self, bg='white', width=800, height=600)
         self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.canvas.bind("<Button-1>", self.canvas_click_handler)
-        self.canvas.bind("<Button-3>", self.canvas_right_click_handler)  # Правый клик для удаления
+        self.canvas.bind("<Button-2>", self.canvas_right_click_handler)  # Правый клик для удаления
         self.canvas.bind("<Double-1>", self.canvas_double_click_handler)  # Двойной клик для добавления нового стартового модуля
         self.start_flag = True
         self.frames = []
@@ -76,6 +76,7 @@ class ModularHomeBuilder(tk.Tk):
         self.temp_sides = []
         self.free_sides = []
         self.ring_sides = []
+        self.frames_coord = []
 
         self.short_soed = 0
         self.long_soed = 0
@@ -147,6 +148,8 @@ class ModularHomeBuilder(tk.Tk):
         elif choice == 2:
             self.label_radio.config(text="Выбрано: бетонный фундамент", fg="blue")
             self.flag_rams = False
+            self.basement_hight = 0
+            self.cokol_text.config(text="Высота цоколя: 0", fg="blue")
 
         s = self.calculate_and_display_results()
         self.need_down_frames = self.flag_rams
@@ -161,12 +164,15 @@ class ModularHomeBuilder(tk.Tk):
 
         s += ("Вес дома: " + str(
             self.house.financial_characteristics["Форматированный вес всех комплектов"]) +
-              "кг." + "\n")
+              " кг." + "\n")
         s += ("Цена дома: " + str(
             self.house.financial_characteristics["Форматированная розничная цена (с НДС)"]) +
-              "р." + "\n")
+              " р." + "\n")
         s += "Площадь дома: " + str(
             self.house.financial_characteristics["Форматированная площадь дома"]) + " кв. м." + "\n"
+        s += "Цена дома \n за кв. м.: " + str(
+            self.house.financial_characteristics[
+                "Форматированная розничная цена за м. кв. (с НДС)"]) + " р. / кв. м." + "\n"
         self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
 
 
@@ -176,7 +182,24 @@ class ModularHomeBuilder(tk.Tk):
         try:
             cok = int(self.cokol.get())
             if type(cok) == int:
-                if cok >= 0:
+                if not self.flag_rams and not cok == 0:
+                    text = "У версии с бетонными фундаментом\n цоколь должен быть равен 0!"
+                elif cok < self.house.specification["Состав комплекта панелей"]["Характеристики Панель цокольная"][
+                    "минимальная высота цоколя"] and self.flag_rams:
+                    text = (
+                            "Цоколь должен быть \nбольше или равен " +
+                            str(self.house.specification["Состав комплекта панелей"]["Характеристики Панель цокольная"][
+                                    "минимальная высота цоколя"]) + " !")
+                elif cok > self.house.specification["Состав комплекта панелей"]["Характеристики Панель цокольная"][
+                    "длина"] - self.house.specification["Состав комплекта панелей"]["Характеристики Панель цокольная"][
+                    "минимальное крепление сверху"] and self.flag_rams:
+                    text = (
+                            "Цоколь должен быть \nменьше или равен " +
+                            str(self.house.specification["Состав комплекта панелей"]["Характеристики Панель цокольная"][
+                                    "длина"] -
+                                self.house.specification["Состав комплекта панелей"]["Характеристики Панель цокольная"][
+                                    "минимальное крепление сверху"]) + " !")
+                else:
                     text += str(cok)
                     self.height_cok = cok
                     s = self.calculate_and_display_results()
@@ -193,17 +216,18 @@ class ModularHomeBuilder(tk.Tk):
 
                     s += ("Вес дома: " + str(
                         self.house.financial_characteristics["Форматированный вес всех комплектов"]) +
-                          "кг." + "\n")
+                          " кг." + "\n")
                     s += ("Цена дома: " + str(
                         self.house.financial_characteristics["Форматированная розничная цена (с НДС)"]) +
-                          "р." + "\n")
+                          " р." + "\n")
                     s += "Площадь дома: " + str(
                         self.house.financial_characteristics["Форматированная площадь дома"]) + " кв. м." + "\n"
+                    s += "Цена дома \n за кв. м.: " + str(
+                        self.house.financial_characteristics[
+                            "Форматированная розничная цена за м. кв. (с НДС)"]) + " р. / кв. м." + "\n"
                     self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
-                else:
-                    text += "Цоколь должен быть \nбольше или равна 0!"
         except ValueError:
-            text += "Цоколь должен быть \nчислом!"
+            text = "Цоколь должен быть \nцелым числом!"
 
         self.cokol_text.config(text=text, fg="blue")
 
@@ -911,6 +935,67 @@ class ModularHomeBuilder(tk.Tk):
             else:
                 self.canvas.itemconfig(frame.id, fill="lightgray")
 
+    def find_adjacent(self, rectangles, current_rect, visited, direction):
+        adjacent_rectangles = []
+
+        if direction == 'left':
+            for rect in rectangles:
+                if round(rect[0] + self.width,3) == current_rect[0] and rect[1] == current_rect[1] and rect not in visited:
+                    adjacent_rectangles.append(rect)
+        elif direction == 'right':
+            for rect in rectangles:
+                if round(rect[0] - self.width,3) == current_rect[0] and rect[1] == current_rect[1] and rect not in visited:
+                    adjacent_rectangles.append(rect)
+        elif direction == 'up':
+            for rect in rectangles:
+                if rect[0] == current_rect[0] and round(rect[1] + self.height, 3) == current_rect[1] and rect not in visited:
+                    adjacent_rectangles.append(rect)
+        elif direction == 'down':
+            for rect in rectangles:
+                if rect[0] == current_rect[0] and round(rect[1] - self.height, 3) == current_rect[1] and rect not in visited:
+                    adjacent_rectangles.append(rect)
+
+        return adjacent_rectangles
+
+    def explore_adjacent(self, rectangles, current_rect, visited):
+        adjacent_rectangles = []
+
+        adjacent_rectangles += self.find_adjacent(rectangles, current_rect, visited, 'left')
+        adjacent_rectangles += self.find_adjacent(rectangles, current_rect, visited, 'right')
+        adjacent_rectangles += self.find_adjacent(rectangles, current_rect, visited, 'up')
+        adjacent_rectangles += self.find_adjacent(rectangles, current_rect, visited, 'down')
+
+        return adjacent_rectangles
+
+    def is_important(self, x, y):
+        if len(self.frames_coord) <= 2:
+            return False
+
+        visited = []  # Список для отслеживания посещенных прямоугольников
+        connected_rectangles = []  # Список для хранения прямоугольников, связанных с самым левым верхним
+
+        rectangles = self.frames_coord.copy()
+        rectangles.remove((x,y))
+
+        leftmost_top_rect = min(rectangles, key=lambda x: (x[0], x[1]))
+
+        visited.append(leftmost_top_rect)
+        connected_rectangles.append(leftmost_top_rect)
+
+        adjacent_rectangles = self.explore_adjacent(rectangles, leftmost_top_rect, visited)
+
+        while adjacent_rectangles:
+            next_rect = adjacent_rectangles.pop(0)
+            visited.append(next_rect)
+            connected_rectangles.append(next_rect)
+            adjacent_rectangles += self.explore_adjacent(rectangles, next_rect, visited)
+            adjacent_rectangles = list(set(adjacent_rectangles))
+
+        if len(connected_rectangles) == len(self.frames_coord) - 1:
+            return False
+        else:
+            return True
+
     # def is_important(self, my_frame):
     #     temp_frames = self.frames.copy()
     #     temp_frames.pop(self.frames.index(my_frame))
@@ -967,9 +1052,13 @@ class ModularHomeBuilder(tk.Tk):
                 #     if self.long_soed > 0:
                 #         self.long_soed -= 1
 
-                # if self.is_important(frame):
-                #     print("IMPORTANT")
-                #     return
+                print("frame_coords = ", self.frames_coord)
+                print("x, y = ",frame.x, frame.y)
+                if self.is_important(round(frame.x,3), round(frame.y,3)):
+                    print("IMPORTANT")
+                    return
+
+
 
                 for i in range(0, len(self.temp_sides), 4):
                     if self.temp_sides[i] == (l_d, l_u) and self.temp_sides[i + 1] == (l_u, r_u) and self.temp_sides[i + 2] == (r_d, r_u) and self.temp_sides[i + 3] == (l_d, r_d):
@@ -987,6 +1076,7 @@ class ModularHomeBuilder(tk.Tk):
                         self.temp_tochki.pop(i)
                         break
 
+                self.frames_coord.remove((round(frame.x,3), round(frame.y,3)))
                 self.frames.pop(index)
                 self.canvas.delete(clicked_item)
                 self.selected_frame_index = None
@@ -1040,12 +1130,17 @@ class ModularHomeBuilder(tk.Tk):
                 self.house.count_price_and_weight()
                 print(self.house.walls_list_list)
 
-                s += "Вес дома: " + str(
-                    self.house.financial_characteristics["Форматированный вес всех комплектов"]) + "кг." + "\n"
-                s += "Цена дома: " + str(
-                    self.house.financial_characteristics["Форматированная розничная цена (с НДС)"]) + "р." + "\n"
+                s += ("Вес дома: " + str(
+                    self.house.financial_characteristics["Форматированный вес всех комплектов"]) +
+                      " кг." + "\n")
+                s += ("Цена дома: " + str(
+                    self.house.financial_characteristics["Форматированная розничная цена (с НДС)"]) +
+                      " р." + "\n")
                 s += "Площадь дома: " + str(
                     self.house.financial_characteristics["Форматированная площадь дома"]) + " кв. м." + "\n"
+                s += "Цена дома \n за кв. м.: " + str(
+                    self.house.financial_characteristics[
+                        "Форматированная розничная цена за м. кв. (с НДС)"]) + " р. / кв. м." + "\n"
                 self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
 
                 print("TEMP_TOCHKI: ", self.temp_tochki)
@@ -1096,8 +1191,9 @@ class ModularHomeBuilder(tk.Tk):
 
     def on_enter_side(self, event, frame):
         # Вывод чего-то на экран при наведении на сторону прямоугольника
-        print(f"Наведено на \n ({frame.x}, {frame.y})")
+        #print(f"Наведено на \n ({frame.x}, {frame.y})")
         #self.result_label.config(text=f"Наведено на \n ({frame.x}, {frame.y})")
+        pass
 
     def on_leave_side(self):
         # Очистка метки при уходе курсора с прямоугольника
@@ -1107,7 +1203,8 @@ class ModularHomeBuilder(tk.Tk):
     def on_click_side(self, event, frame):
         # Вывод информации при нажатии на сторону прямоугольника
         #self.result_label.config(text=f"Нажатие на \n({frame.x}, {frame.y})")
-        print(f"Нажатие на \n({frame.x}, {frame.y})")
+        #print(f"Нажатие на \n({frame.x}, {frame.y})")
+        pass
 
     def calculate_internal_sides(self):
         self.short_soed = 0
@@ -1147,6 +1244,8 @@ class ModularHomeBuilder(tk.Tk):
         self.canvas.tag_bind(frame.id, "<Leave>", lambda event: self.on_leave_side())
         self.canvas.tag_bind(frame.id, "<Button-1>", lambda event, frame=frame: self.on_click_side(event, frame))
 
+        self.frames_coord.append((round(frame.x, 3), round(frame.y,3)))
+        print("FRAMES COORD: ", len(self.frames_coord))
 
         l_d = (round(frame.x - frame.width / 2, 3), round(frame.y + frame.height / 2, 3))
         l_u = (round(frame.x - frame.width / 2, 3), round(frame.y - frame.height / 2, 3))
@@ -1227,10 +1326,17 @@ class ModularHomeBuilder(tk.Tk):
         self.house.count_price_and_weight()
         print(self.house.walls_list_list)
 
-        s += "Вес дома: " + str(self.house.financial_characteristics["Форматированный вес всех комплектов"]) + "кг." + "\n"
-        s += "Цена дома: " + str(self.house.financial_characteristics["Форматированная розничная цена (с НДС)"]) + "р." + "\n"
+        s += ("Вес дома: " + str(
+            self.house.financial_characteristics["Форматированный вес всех комплектов"]) +
+              " кг." + "\n")
+        s += ("Цена дома: " + str(
+            self.house.financial_characteristics["Форматированная розничная цена (с НДС)"]) +
+              " р." + "\n")
         s += "Площадь дома: " + str(
             self.house.financial_characteristics["Форматированная площадь дома"]) + " кв. м." + "\n"
+        s += "Цена дома \n за кв. м.: " + str(
+            self.house.financial_characteristics[
+                "Форматированная розничная цена за м. кв. (с НДС)"]) + " р. / кв. м." + "\n"
         self.result_label.config(text=s, font=("Helvetica", 18, "bold"), fg="blue")
 
 

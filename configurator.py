@@ -942,6 +942,7 @@ class House:
                                          "длина"] *
                                      self.specification["Состав комплекта рам"]["Характеристики Рама универсальная"][
                                          "ширина"] / 1000000)),
+            "Форматированная розничная цена за м. кв. (с НДС)": 0,
         }
         self.house_name = str(self.financial_characteristics["Форматированная площадь дома"])
 
@@ -1302,6 +1303,9 @@ class House:
 
         self.financial_characteristics["Форматированная розничная цена (с НДС)"] = (
             "{:,}".format(math.ceil(self.financial_characteristics["Розничная цена (с НДС)"])).replace(",", " "))
+
+        self.financial_characteristics["Форматированная розничная цена за м. кв. (с НДС)"] = (
+            "{:,}".format(math.ceil(self.financial_characteristics["Розничная цена (с НДС)"] / self.financial_characteristics["Форматированная площадь дома"])).replace(",", " "))
     def count_specification(self):
         """
         print()
