@@ -278,6 +278,12 @@ class ModularHomeBuilder(tk.Tk):
             direction_y = 0
             arr_of_sides = []
             start = True
+            flag_cont = False
+            for el_j in self.ring_sides:
+                if el in el_j:
+                    flag_cont = True
+            if flag_cont:
+                continue
             while True:
                 if direction_y != 0 or start:
                     arr_of_sides.append((temp_lower,temp_upper))
@@ -318,6 +324,7 @@ class ModularHomeBuilder(tk.Tk):
                     break
                 elif temp_lower == const_upper and (direction_x == -1 and direction_y == -1 or direction_x == 0 and direction_y == -1):
                     arr_of_sides.append((temp_lower, temp_upper))
+
                     #print(arr_of_sides)
                     #self.ring_sides = arr_of_sides
                     self.ring_sides.append(arr_of_sides)
