@@ -750,19 +750,35 @@ class ModularHomeBuilder(tk.Tk):
                         first_side = d_x[min_x][0]
                         if first_side[-1][0][1] != temp_y:
                             first_side = d_x[min_x][-1]
+
+                        for el in d_x[min_x]:
+                            if ((min_x, temp_y), (min_x, round(temp_y - self.height, 3))) in el:
+                                first_side = el
                     else:
                         first_side = d_x[min_x][-1]
                         if first_side[-1][0][1] != temp_y:
                             first_side = d_x[min_x][0]
+
+                        for el in d_x[min_x]:
+                            if ((min_x, temp_y), (min_x, round(temp_y - self.height, 3))) in el:
+                                first_side = el
                 elif direction_x == 1:
                     if direction_y == -1:
                         first_side = d_x[min_x][0]
                         if first_side[-1][0][1] != temp_y:
                             first_side = d_x[min_x][-1]
+
+                        for el in d_x[min_x]:
+                            if ((min_x, round(temp_y + self.height,3)), (min_x, temp_y)) in el:
+                                first_side = el
                     elif direction_y == 1:
                         first_side = d_x[min_x][-1]
                         if [((min_x, round(temp_y + self.height, 3)), (min_x, temp_y))] in d_x[min_x]:
                             first_side = [((min_x, round(temp_y + self.height, 3)), (min_x, temp_y))]
+
+                        for el in d_x[min_x]:
+                            if ((min_x, round(temp_y + self.height, 3)), (min_x, temp_y)) in el:
+                                first_side = el
 
                 wall = Wall()
                 left_p = first_side[0][1] # up
@@ -820,14 +836,26 @@ class ModularHomeBuilder(tk.Tk):
                 if direction_y == -1:
                     if direction_x == 1:
                         second_side = d_y[min_y][0]
+                        for el in d_y[min_y]:
+                            if ((round(temp_x - self.width,3), min_y), (temp_x, min_y)) in el:
+                                second_side = el
                     else:
 
                         second_side = d_y[min_y][-1]
+                        for el in d_y[min_y]:
+                            if ((round(temp_x - self.width,3), min_y), (temp_x, min_y)) in el:
+                                second_side = el
                 else:
                     if direction_x == -1:
                         second_side = d_y[min_y][-1]
+                        for el in d_y[min_y]:
+                            if ((temp_x, min_y), (round(temp_x + self.width, 3), min_y)) in el:
+                                second_side = el
                     else:
                         second_side = d_y[min_y][0]
+                        for el in d_y[min_y]:
+                            if ((temp_x, min_y),(round(temp_x + self.width,3), min_y)) in el:
+                                second_side = el
 
                 wall = Wall()
                 left_p = second_side[0][0] # left
