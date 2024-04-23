@@ -67,7 +67,7 @@ class ModularHomeBuilder(tk.Tk):
         self.canvas = tk.Canvas(self, bg='white', width=800, height=600)
         self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.canvas.bind("<Button-1>", self.canvas_click_handler)
-        self.canvas.bind("<Button-3>", self.canvas_right_click_handler)  # Правый клик для удаления
+        self.canvas.bind("<Button-2>", self.canvas_right_click_handler)  # Правый клик для удаления
         self.canvas.bind("<Double-1>", self.canvas_double_click_handler)  # Двойной клик для добавления нового стартового модуля
         self.start_flag = True
         self.frames = []
@@ -320,10 +320,23 @@ class ModularHomeBuilder(tk.Tk):
                         temp_upper = (temp_upper[0], round(temp_upper[1] - self.height,3))
 
                 total_elements = sum(len(sub_array) for sub_array in self.ring_sides)
-                if len(arr_of_sides) == len(self.free_sides) - total_elements - 1 or len(arr_of_sides) > len(self.free_sides) // 2:
+
+                min_x = min(self.temp_tochki, key=lambda p: p[0])[0]
+                min_y = min(self.temp_tochki, key=lambda p: p[1])[1]
+
+                if len(arr_of_sides) == len(self.free_sides) - total_elements - 1:
                     break
                 elif temp_lower == const_upper and (direction_x == -1 and direction_y == -1 or direction_x == 0 and direction_y == -1):
+                    #check if external
+                    # leftest tochka of external:
                     arr_of_sides.append((temp_lower, temp_upper))
+
+                    min_x = min(self.temp_tochki, key=lambda p: p[0])[0]
+                    min_y = min(self.temp_tochki, key=lambda p: p[0])[1]
+                    if ((min_x, round(min_y + self.height,3)), (min_x, min_y)) in arr_of_sides:
+                        break # because it is external sides
+
+
 
                     #print(arr_of_sides)
                     #self.ring_sides = arr_of_sides
@@ -739,7 +752,7 @@ class ModularHomeBuilder(tk.Tk):
         s = f''
 
         min_x = min(self.temp_tochki, key=lambda p: p[0])[0]
-        min_y = min(self.temp_tochki, key=lambda p: p[1])[1]
+        min_y = min(self.temp_tochki, key=lambda p: p[0])[1]
 
         direction_x = 1
         direction_y = 1
@@ -754,34 +767,34 @@ class ModularHomeBuilder(tk.Tk):
                     self.walls_start = first_side[0][1]
                 elif direction_x == -1:
                     if direction_y == -1:
-                        first_side = d_x[min_x][0]
-                        if first_side[-1][0][1] != temp_y:
-                            first_side = d_x[min_x][-1]
+                        # first_side = d_x[min_x][0]
+                        # if first_side[-1][0][1] != temp_y:
+                        #     first_side = d_x[min_x][-1]
 
                         for el in d_x[min_x]:
                             if ((min_x, temp_y), (min_x, round(temp_y - self.height, 3))) in el:
                                 first_side = el
                     else:
-                        first_side = d_x[min_x][-1]
-                        if first_side[-1][0][1] != temp_y:
-                            first_side = d_x[min_x][0]
+                        # first_side = d_x[min_x][-1]
+                        # if first_side[-1][0][1] != temp_y:
+                        #     first_side = d_x[min_x][0]
 
                         for el in d_x[min_x]:
                             if ((min_x, temp_y), (min_x, round(temp_y - self.height, 3))) in el:
                                 first_side = el
                 elif direction_x == 1:
                     if direction_y == -1:
-                        first_side = d_x[min_x][0]
-                        if first_side[-1][0][1] != temp_y:
-                            first_side = d_x[min_x][-1]
+                        # first_side = d_x[min_x][0]
+                        # if first_side[-1][0][1] != temp_y:
+                        #     first_side = d_x[min_x][-1]
 
                         for el in d_x[min_x]:
                             if ((min_x, round(temp_y + self.height,3)), (min_x, temp_y)) in el:
                                 first_side = el
                     elif direction_y == 1:
-                        first_side = d_x[min_x][-1]
-                        if [((min_x, round(temp_y + self.height, 3)), (min_x, temp_y))] in d_x[min_x]:
-                            first_side = [((min_x, round(temp_y + self.height, 3)), (min_x, temp_y))]
+                        # first_side = d_x[min_x][-1]
+                        # if [((min_x, round(temp_y + self.height, 3)), (min_x, temp_y))] in d_x[min_x]:
+                        #     first_side = [((min_x, round(temp_y + self.height, 3)), (min_x, temp_y))]
 
                         for el in d_x[min_x]:
                             if ((min_x, round(temp_y + self.height, 3)), (min_x, temp_y)) in el:
