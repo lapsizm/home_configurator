@@ -331,8 +331,16 @@ class ModularHomeBuilder(tk.Tk):
                     # leftest tochka of external:
                     arr_of_sides.append((temp_lower, temp_upper))
 
-                    min_x = min(self.temp_tochki, key=lambda p: p[0])[0]
-                    min_y = min(self.temp_tochki, key=lambda p: p[0])[1]
+                    min_tuple = None
+
+                    for tup in self.temp_tochki:
+                        x, y = tup
+                        if min_tuple is None or (x <= min_tuple[0] and y <= min_tuple[1]):
+                            min_tuple = (x, y)
+
+                    min_x = min_tuple[0]
+                    min_y = min_tuple[1]
+
                     if ((min_x, round(min_y + self.height,3)), (min_x, min_y)) in arr_of_sides:
                         break # because it is external sides
 
@@ -381,7 +389,21 @@ class ModularHomeBuilder(tk.Tk):
                 if len(arr_of_sides) == len(self.free_sides) - total_elements - 1:
                     break
                 elif temp_lower == const_upper and (direction_x == -1 and direction_y == -1 or direction_x == 0 and direction_y == -1):
+
                     arr_of_sides.append((temp_lower, temp_upper))
+                    min_tuple = None
+
+                    for tup in self.temp_tochki:
+                        x, y = tup
+                        if min_tuple is None or (x <= min_tuple[0] and y <= min_tuple[1]):
+                            min_tuple = (x, y)
+
+                    min_x = min_tuple[0]
+                    min_y = min_tuple[1]
+
+                    if ((min_x, round(min_y + self.height, 3)), (min_x, min_y)) in arr_of_sides:
+                        break  # because it is external sides
+
                     #print(arr_of_sides)
                     #self.ring_sides = arr_of_sides
                     self.ring_sides.append(arr_of_sides)
@@ -751,9 +773,9 @@ class ModularHomeBuilder(tk.Tk):
 
         d_x = sorted_dict
 
-        count_side = 0
         for k, v in d_y.items():
-            temp = [[], [], [], [], [] , [], [], [], []]
+            count_side = 0
+            temp = [[], [], [], [], [] , [], [], [], [],[], [], [], [], [] , [], [], [], [],[], [], [], [], [] , [], [], [], [],[], [], [], [], [] , [], [], [], [],[], [], [], [], [] , [], [], [], []]
             for i in range(len(v) - 1):
                 temp[count_side].append(v[i])
                 if v[i][1][0] != v[i + 1][0][0]:
@@ -762,9 +784,9 @@ class ModularHomeBuilder(tk.Tk):
             temp = list(filter(lambda x: x != [], temp))
             d_y[k] = temp
 
-        count_side = 0
         for k, v in d_x.items():
-            temp = [[], [], [], [], [], [], [], [], []]
+            count_side = 0
+            temp = [[], [], [], [], [] , [], [], [], [],[], [], [], [], [] , [], [], [], [],[], [], [], [], [] , [], [], [], [],[], [], [], [], [] , [], [], [], [],[], [], [], [], [] , [], [], [], []]
             for i in range(len(v) - 1):
                 temp[count_side].append(v[i])
                 if v[i][0][1] != v[i + 1][1][1]:
@@ -775,8 +797,15 @@ class ModularHomeBuilder(tk.Tk):
 
         s = f''
 
-        min_x = min(self.temp_tochki, key=lambda p: p[0])[0]
-        min_y = min(self.temp_tochki, key=lambda p: p[0])[1]
+        min_tuple = None
+
+        for tup in self.temp_tochki:
+            x, y = tup
+            if min_tuple is None or (x < min_tuple[0] and y <= min_tuple[1]):
+                min_tuple = (x, y)
+
+        min_x = min_tuple[0]
+        min_y = min_tuple[1]
 
         direction_x = 1
         direction_y = 1
